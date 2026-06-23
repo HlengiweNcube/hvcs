@@ -71,6 +71,11 @@ class CaregiverUpdateForm(forms.ModelForm):
         return caregiver
 
 
+def landing(request):
+    """HVCS landing page."""
+    return render(request, 'accounts/landing.html')
+
+
 @login_required
 def dashboard(request):
     """Send each logged-in user to the dashboard for their role."""

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HVCS Home</title>
+    <link rel="stylesheet" href="{% static 'accounts/styles.css' %}">
+</head>
+<body>
+    <main class="page">
+        <h1 class="page-title">HVCS</h1>
+        <p class="page-text">Home Care Visitation and Compliance System</p>
+        
+        {% if user.is_authenticated %}
+            <p class="page-text">Welcome, {{ user.username }}.</p>
+            
+            {% if user.role == 'ADMIN' %}
+                <p class="page-text">You are logged in as <strong>Administrator</strong>.</p>
+                <div class="link-row">
+                    <a class="link-button" href="/accounts/admin-dashboard/">Go to Admin Dashboard</a>
+                    <a class="link-button" href="/accounts/clients/">Manage Clients</a>
+                    <a class="link-button" href="/accounts/caregivers/">Manage Caregivers</a>
+                </div>
+            {% elif user.role == 'MANAGER' %}
+                <p class="page-text">You are logged in as <strong>Manager</strong>.</p>
+                <div class="link-row">
+                    <a class="link-button" href="/accounts/manager-dashboard/">Go to Manager Dashboard</a>
+                </div>
+            {% else %}
+                <p class="page-text">You are logged in as <strong>Caregiver</strong>.</p>
+                <div class="link-row">
+                    <a class="link-button" href="/accounts/caregiver-dashboard/">Go to Caregiver Dashboard</a>
+                </div>
+            {% endif %}
+            
+            <div class="link-row">
+                <a class="button-link" href="/accounts/logout/">Logout</a>
+            </div>
+        {% else %}
+            <p class="page-text">Please log in to access the system.</p>
+            <div class="link-row">
+                <a class="link-button" href="/accounts/login/">Sign In</a>
+            </div>
+        {% endif %}
+    </main>
+</body>
+</html>
