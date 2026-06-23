@@ -94,8 +94,11 @@ WSGI_APPLICATION = 'hvcs_project.wsgi.application'
 
 database_url = os.getenv('DATABASE_URL')
 if database_url:
+    parse_kwargs = {'conn_max_age': 600}
+    if database_url.startswith('postgres://') or database_url.startswith('postgresql://'):
+        parse_kwargs['ssl_require'] = True
     DATABASES = {
-        'default': dj_database_url.parse(database_url, conn_max_age=600, ssl_require=True),
+        'default': dj_database_url.parse(database_url, **parse_kwargs),
     }
 else:
     DATABASES = {
