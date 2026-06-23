@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import User
+from .models import Client, User
 
 
 @admin.register(User)
@@ -18,3 +18,10 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = UserAdmin.add_fieldsets + (
         ('HVCS role', {'fields': ('role',)}),
     )
+
+
+@admin.register(Client)
+class ClientAdmin(admin.ModelAdmin):
+    list_display = ('first_name', 'last_name', 'phone', 'email', 'is_active')
+    list_filter = ('is_active',)
+    search_fields = ('first_name', 'last_name', 'phone', 'email')

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Client</title>
+</head>
+<body>
+    <h1>Delete Client</h1>
+    <p>Are you sure you want to delete {{ client.first_name }} {{ client.last_name }}?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Confirm Delete</button>
+        <a href="/accounts/clients/">Cancel</a>
+    </form>
+</body>
+</html>
