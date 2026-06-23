@@ -9,6 +9,6 @@
     <h1>Manager Dashboard</h1>
     <p>Welcome, {{ request.user.username }}.</p>
     <p>This is the manager dashboard placeholder for HVCS.</p>
-    <p><a href="/accounts/logout/">Logout</a></p>
+    <form method="post" action="/accounts/logout/">{% csrf_token %}<button type="submit">Logout</button></form>
 </body>
 </html>

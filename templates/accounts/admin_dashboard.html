@@ -12,6 +12,6 @@
     <p><a href="/accounts/clients/">Manage Clients (CRUD)</a></p>
     <p><a href="/accounts/caregivers/">Manage Caregivers (CRUD)</a></p>
     <p><a href="/admin/">Open Django Admin</a></p>
-    <p><a href="/accounts/logout/">Logout</a></p>
+    <form method="post" action="/accounts/logout/">{% csrf_token %}<button type="submit">Logout</button></form>
 </body>
 </html>
