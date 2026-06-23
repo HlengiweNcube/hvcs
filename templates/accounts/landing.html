@@ -35,7 +35,7 @@
             {% endif %}
             
             <div class="link-row">
-                <a class="button-link" href="/accounts/logout/">Logout</a>
+                <form method="post" action="/accounts/logout/" style="display:inline">{% csrf_token %}<button type="submit" class="button-link">Logout</button></form>
             </div>
         {% else %}
             <p class="page-text">Please log in to access the system.</p>
