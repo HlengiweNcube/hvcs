@@ -1,18 +1,24 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delete Client</title>
+    <link rel="stylesheet" href="{% static 'accounts/styles.css' %}">
 </head>
 <body>
-    <h1>Delete Client</h1>
-    <p>Are you sure you want to delete {{ client.first_name }} {{ client.last_name }}?</p>
+    <main class="page page--narrow">
+    <h1 class="page-title">Delete Client</h1>
+    <p class="page-text">Are you sure you want to delete {{ client.first_name }} {{ client.last_name }}?</p>
 
-    <form method="post">
+    <form method="post" class="form-shell">
         {% csrf_token %}
-        <button type="submit">Confirm Delete</button>
-        <a href="/accounts/clients/">Cancel</a>
+        <div class="action-row">
+            <button type="submit" class="button button--danger">Confirm Delete</button>
+            <a class="button-link" href="/accounts/clients/">Cancel</a>
+        </div>
     </form>
+    </main>
 </body>
 </html>

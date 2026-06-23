@@ -1,17 +1,23 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{% static 'accounts/styles.css' %}">
 </head>
 <body>
-    <h1>Admin Dashboard</h1>
-    <p>Welcome, {{ request.user.username }}.</p>
-    <p>This is the admin dashboard placeholder for HVCS.</p>
-    <p><a href="/accounts/clients/">Manage Clients (CRUD)</a></p>
-    <p><a href="/accounts/caregivers/">Manage Caregivers (CRUD)</a></p>
-    <p><a href="/admin/">Open Django Admin</a></p>
-    <p><a href="/accounts/logout/">Logout</a></p>
+    <main class="page">
+        <h1 class="page-title">Admin Dashboard</h1>
+        <p class="page-text">Welcome, {{ request.user.username }}.</p>
+        <p class="page-text">This is the admin dashboard placeholder for HVCS.</p>
+        <div class="link-row">
+            <a class="link-button" href="/accounts/clients/">Manage Clients (CRUD)</a>
+            <a class="link-button" href="/accounts/caregivers/">Manage Caregivers (CRUD)</a>
+            <a class="button-link" href="/admin/">Open Django Admin</a>
+            <a class="button-link" href="/accounts/logout/">Logout</a>
+        </div>
+    </main>
 </body>
 </html>

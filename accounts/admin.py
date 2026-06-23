@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import Client, User
+from .models import Caregiver, Client, User
 
 
 @admin.register(User)
@@ -22,6 +22,13 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ('first_name', 'last_name', 'phone', 'email', 'is_active')
+    list_display = ('first_name', 'last_name', 'contact_phone', 'is_active')
     list_filter = ('is_active',)
-    search_fields = ('first_name', 'last_name', 'phone', 'email')
+    search_fields = ('first_name', 'last_name', 'contact_phone', 'care_needs')
+
+
+@admin.register(Caregiver)
+class CaregiverAdmin(admin.ModelAdmin):
+    list_display = ('first_name', 'last_name', 'user', 'phone', 'is_active')
+    list_filter = ('is_active',)
+    search_fields = ('first_name', 'last_name', 'user__username', 'user__email', 'phone')

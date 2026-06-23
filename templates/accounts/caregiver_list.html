@@ -1,16 +1,21 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Caregivers</title>
+    <link rel="stylesheet" href="{% static 'accounts/styles.css' %}">
 </head>
 <body>
-    <h1>Caregivers</h1>
-    <p><a href="/accounts/admin-dashboard/">Back to Admin Dashboard</a></p>
-    <p><a href="/accounts/caregivers/add/">Add Caregiver</a></p>
+    <main class="page">
+    <h1 class="page-title">Caregivers</h1>
+    <div class="link-row">
+        <a class="button-link" href="/accounts/admin-dashboard/">Back to Admin Dashboard</a>
+        <a class="link-button" href="/accounts/caregivers/add/">Add Caregiver</a>
+    </div>
 
-    <table border="1" cellpadding="8" cellspacing="0">
+    <table class="data-table">
         <thead>
             <tr>
                 <th>Username</th>
@@ -23,9 +28,9 @@
         <tbody>
             {% for caregiver in caregivers %}
                 <tr>
-                    <td>{{ caregiver.username }}</td>
+                    <td>{{ caregiver.user.username }}</td>
                     <td>{{ caregiver.first_name }} {{ caregiver.last_name }}</td>
-                    <td>{{ caregiver.email }}</td>
+                    <td>{{ caregiver.user.email }}</td>
                     <td>{{ caregiver.is_active }}</td>
                     <td>
                         <a href="/accounts/caregivers/{{ caregiver.id }}/edit/">Edit</a>
@@ -34,10 +39,11 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="5">No caregivers yet.</td>
+                    <td colspan="5" class="empty-row">No caregivers yet.</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+    </main>
 </body>
 </html>

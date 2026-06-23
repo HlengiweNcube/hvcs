@@ -1,18 +1,24 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
+    <link rel="stylesheet" href="{% static 'accounts/styles.css' %}">
 </head>
 <body>
-    <h1>{{ title }}</h1>
-    <p><a href="/accounts/caregivers/">Back to Caregivers</a></p>
+    <main class="page page--narrow">
+    <h1 class="page-title">{{ title }}</h1>
+    <div class="link-row">
+        <a class="button-link" href="/accounts/caregivers/">Back to Caregivers</a>
+    </div>
 
-    <form method="post">
+    <form method="post" class="form-shell">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Save</button>
+        <button type="submit" class="button">Save</button>
     </form>
+    </main>
 </body>
 </html>

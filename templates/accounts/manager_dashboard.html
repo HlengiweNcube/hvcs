@@ -1,14 +1,20 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manager Dashboard</title>
+    <link rel="stylesheet" href="{% static 'accounts/styles.css' %}">
 </head>
 <body>
-    <h1>Manager Dashboard</h1>
-    <p>Welcome, {{ request.user.username }}.</p>
-    <p>This is the manager dashboard placeholder for HVCS.</p>
-    <p><a href="/accounts/logout/">Logout</a></p>
+    <main class="page page--narrow">
+        <h1 class="page-title">Manager Dashboard</h1>
+        <p class="page-text">Welcome, {{ request.user.username }}.</p>
+        <p class="page-text">This is the manager dashboard placeholder for HVCS.</p>
+        <div class="link-row">
+            <a class="button-link" href="/accounts/logout/">Logout</a>
+        </div>
+    </main>
 </body>
 </html>

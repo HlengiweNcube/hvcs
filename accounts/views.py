@@ -4,32 +4,71 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .decorators import role_required
-from .models import Client, User
+from .models import Caregiver, Client, User
 
 
 class ClientForm(forms.ModelForm):
     class Meta:
         model = Client
-        fields = ('first_name', 'last_name', 'phone', 'email', 'address', 'is_active')
+        fields = ('first_name', 'last_name', 'address', 'contact_phone', 'care_needs', 'is_active')
 
 
 class CaregiverCreateForm(UserCreationForm):
+    first_name = forms.CharField(max_length=100)
+    last_name = forms.CharField(max_length=100)
+    phone = forms.CharField(max_length=30, required=False)
+    qualifications = forms.CharField(max_length=255, required=False)
+    is_active = forms.BooleanField(required=False, initial=True)
+
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ('username', 'first_name', 'last_name', 'email')
+        fields = ('username', 'email')
 
     def save(self, commit=True):
         user = super().save(commit=False)
         user.role = User.Role.CAREGIVER
+        user.first_name = self.cleaned_data['first_name']
+        user.last_name = self.cleaned_data['last_name']
+        user.is_active = self.cleaned_data['is_active']
         if commit:
             user.save()
+            Caregiver.objects.create(
+                user=user,
+                first_name=self.cleaned_data['first_name'],
+                last_name=self.cleaned_data['last_name'],
+                phone=self.cleaned_data['phone'],
+                qualifications=self.cleaned_data['qualifications'],
+                is_active=self.cleaned_data['is_active'],
+            )
         return user
 
 
 class CaregiverUpdateForm(forms.ModelForm):
+    username = forms.CharField(max_length=150)
+    email = forms.EmailField(required=False)
+
     class Meta:
-        model = User
-        fields = ('username', 'first_name', 'last_name', 'email', 'is_active')
+        model = Caregiver
+        fields = ('first_name', 'last_name', 'phone', 'qualifications', 'is_active')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.fields['username'].initial = self.instance.user.username
+            self.fields['email'].initial = self.instance.user.email
+
+    def save(self, commit=True):
+        caregiver = super().save(commit=False)
+        caregiver.user.username = self.cleaned_data['username']
+        caregiver.user.email = self.cleaned_data['email']
+        caregiver.user.first_name = self.cleaned_data['first_name']
+        caregiver.user.last_name = self.cleaned_data['last_name']
+        caregiver.user.is_active = self.cleaned_data['is_active']
+        caregiver.user.role = User.Role.CAREGIVER
+        if commit:
+            caregiver.user.save()
+            caregiver.save()
+        return caregiver
 
 
 @login_required
@@ -100,7 +139,7 @@ def client_delete(request, pk):
 
 @role_required(User.Role.ADMIN)
 def caregiver_list(request):
-    caregivers = User.objects.filter(role=User.Role.CAREGIVER).order_by('username')
+    caregivers = Caregiver.objects.select_related('user').all()
     return render(request, 'accounts/caregiver_list.html', {'caregivers': caregivers})
 
 
@@ -118,13 +157,11 @@ def caregiver_create(request):
 
 @role_required(User.Role.ADMIN)
 def caregiver_update(request, pk):
-    caregiver = get_object_or_404(User, pk=pk, role=User.Role.CAREGIVER)
+    caregiver = get_object_or_404(Caregiver, pk=pk, user__role=User.Role.CAREGIVER)
     if request.method == 'POST':
         form = CaregiverUpdateForm(request.POST, instance=caregiver)
         if form.is_valid():
-            updated = form.save(commit=False)
-            updated.role = User.Role.CAREGIVER
-            updated.save()
+            form.save()
             return redirect('caregiver_list')
     else:
         form = CaregiverUpdateForm(instance=caregiver)
@@ -133,9 +170,9 @@ def caregiver_update(request, pk):
 
 @role_required(User.Role.ADMIN)
 def caregiver_delete(request, pk):
-    caregiver = get_object_or_404(User, pk=pk, role=User.Role.CAREGIVER)
+    caregiver = get_object_or_404(Caregiver, pk=pk, user__role=User.Role.CAREGIVER)
     if request.method == 'POST':
-        caregiver.delete()
+        caregiver.user.delete()
         return redirect('caregiver_list')
     return render(request, 'accounts/caregiver_confirm_delete.html', {'caregiver': caregiver})
 

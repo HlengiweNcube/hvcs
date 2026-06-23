@@ -1,19 +1,23 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HVCS Login</title>
+    <link rel="stylesheet" href="{% static 'accounts/styles.css' %}">
 </head>
 <body>
-    <h1>HVCS Login</h1>
-    {% if form.errors %}
-        <p>Invalid username or password.</p>
-    {% endif %}
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Sign in</button>
-    </form>
+    <main class="page page--narrow">
+        <h1 class="page-title">HVCS Login</h1>
+        {% if form.errors %}
+            <p class="error-text">Invalid username or password.</p>
+        {% endif %}
+        <form method="post" class="form-shell">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="button">Sign in</button>
+        </form>
+    </main>
 </body>
 </html>

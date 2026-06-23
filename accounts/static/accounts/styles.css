@@ -1,0 +1,153 @@
+body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f4f7fb;
+    color: #1f2937;
+}
+
+.page {
+    max-width: 960px;
+    margin: 40px auto;
+    padding: 32px;
+    background: #ffffff;
+    border: 1px solid #d8e1ea;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.page--narrow {
+    max-width: 640px;
+}
+
+.page-title {
+    margin: 0 0 12px;
+    font-size: 2rem;
+}
+
+.page-text,
+.error-text {
+    margin: 0 0 16px;
+    line-height: 1.5;
+}
+
+.error-text {
+    color: #b42318;
+}
+
+.link-row,
+.action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 0 0 20px;
+}
+
+.link-button,
+.button,
+.button-link {
+    display: inline-block;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid #0f5ea8;
+    background: #0f5ea8;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.button-link {
+    background: #ffffff;
+    color: #0f5ea8;
+}
+
+.button--danger {
+    border-color: #b42318;
+    background: #b42318;
+}
+
+.button:hover,
+.link-button:hover,
+.button-link:hover {
+    opacity: 0.92;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+}
+
+.data-table th,
+.data-table td {
+    padding: 12px 14px;
+    border: 1px solid #d8e1ea;
+    text-align: left;
+    vertical-align: top;
+}
+
+.data-table th {
+    background: #eef4fa;
+}
+
+.empty-row {
+    text-align: center;
+    color: #6b7280;
+}
+
+.form-shell p {
+    margin: 0 0 14px;
+}
+
+.form-shell label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.form-shell input,
+.form-shell textarea,
+.form-shell select {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid #c5d1dd;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.form-shell textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-shell .helptext {
+    display: block;
+    margin-top: 4px;
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.form-shell ul.errorlist {
+    margin: 0 0 8px;
+    padding-left: 18px;
+    color: #b42318;
+}
+
+.inline-form {
+    display: inline-block;
+    margin-right: 8px;
+}
+
+@media (max-width: 720px) {
+    .page {
+        margin: 20px;
+        padding: 20px;
+    }
+
+    .data-table {
+        display: block;
+        overflow-x: auto;
+    }
+}

@@ -1,22 +1,27 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clients</title>
+    <link rel="stylesheet" href="{% static 'accounts/styles.css' %}">
 </head>
 <body>
-    <h1>Clients</h1>
-    <p><a href="/accounts/admin-dashboard/">Back to Admin Dashboard</a></p>
-    <p><a href="/accounts/clients/add/">Add Client</a></p>
+    <main class="page">
+    <h1 class="page-title">Clients</h1>
+    <div class="link-row">
+        <a class="button-link" href="/accounts/admin-dashboard/">Back to Admin Dashboard</a>
+        <a class="link-button" href="/accounts/clients/add/">Add Client</a>
+    </div>
 
-    <table border="1" cellpadding="8" cellspacing="0">
+    <table class="data-table">
         <thead>
             <tr>
                 <th>Name</th>
-                <th>Phone</th>
-                <th>Email</th>
                 <th>Address</th>
+                <th>Contact Phone</th>
+                <th>Care Needs</th>
                 <th>Active</th>
                 <th>Actions</th>
             </tr>
@@ -25,9 +30,9 @@
             {% for client in clients %}
                 <tr>
                     <td>{{ client.first_name }} {{ client.last_name }}</td>
-                    <td>{{ client.phone }}</td>
-                    <td>{{ client.email }}</td>
                     <td>{{ client.address }}</td>
+                    <td>{{ client.contact_phone }}</td>
+                    <td>{{ client.care_needs }}</td>
                     <td>{{ client.is_active }}</td>
                     <td>
                         <a href="/accounts/clients/{{ client.id }}/edit/">Edit</a>
@@ -36,10 +41,11 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="6">No clients yet.</td>
+                    <td colspan="6" class="empty-row">No clients yet.</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+    </main>
 </body>
 </html>
