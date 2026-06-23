@@ -28,9 +28,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-7*-kxlqnk$cf6&inw(_1ldt*@w4*+i2aix+!&90s*cms3bulyj')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+
+def _parse_hosts(value):
+    hosts = []
+    for raw in value.split(','):
+        host = raw.strip().replace('https://', '').replace('http://', '').strip('/')
+        if host:
+            hosts.append(host)
+    return hosts
+
+
+ALLOWED_HOSTS = _parse_hosts(os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1'))
+render_host = os.getenv('RENDER_EXTERNAL_HOSTNAME', '').strip()
+if render_host and render_host not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(render_host)
 
 
 # Application definition
@@ -134,5 +147,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+AUTH_USER_MODEL = 'accounts.User'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

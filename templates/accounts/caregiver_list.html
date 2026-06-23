@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caregivers</title>
+</head>
+<body>
+    <h1>Caregivers</h1>
+    <p><a href="/accounts/admin-dashboard/">Back to Admin Dashboard</a></p>
+    <p><a href="/accounts/caregivers/add/">Add Caregiver</a></p>
+
+    <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Active</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for caregiver in caregivers %}
+                <tr>
+                    <td>{{ caregiver.username }}</td>
+                    <td>{{ caregiver.first_name }} {{ caregiver.last_name }}</td>
+                    <td>{{ caregiver.email }}</td>
+                    <td>{{ caregiver.is_active }}</td>
+                    <td>
+                        <a href="/accounts/caregivers/{{ caregiver.id }}/edit/">Edit</a>
+                        <a href="/accounts/caregivers/{{ caregiver.id }}/delete/">Delete</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">No caregivers yet.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

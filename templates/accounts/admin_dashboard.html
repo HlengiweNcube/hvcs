@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+    <p>Welcome, {{ request.user.username }}.</p>
+    <p>This is the admin dashboard placeholder for HVCS.</p>
+    <p><a href="/accounts/clients/">Manage Clients (CRUD)</a></p>
+    <p><a href="/accounts/caregivers/">Manage Caregivers (CRUD)</a></p>
+    <p><a href="/admin/">Open Django Admin</a></p>
+    <p><a href="/accounts/logout/">Logout</a></p>
+</body>
+</html>
