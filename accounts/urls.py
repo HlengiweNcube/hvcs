@@ -18,4 +18,8 @@ urlpatterns = [
     path('caregivers/add/', views.caregiver_create, name='caregiver_create'),
     path('caregivers/<int:pk>/edit/', views.caregiver_update, name='caregiver_update'),
     path('caregivers/<int:pk>/delete/', views.caregiver_delete, name='caregiver_delete'),
+    path('visits/', views.visit_list, name='visit_list'),
+    path('visits/add/', views.visit_create, name='visit_create'),
+    path('visits/<int:pk>/edit/', views.visit_update, name='visit_update'),
+    path('visits/<int:pk>/delete/', views.visit_delete, name='visit_delete'),
 ]

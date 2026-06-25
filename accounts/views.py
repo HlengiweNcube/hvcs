@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .decorators import role_required
-from .models import Caregiver, Client, User
+from .models import Caregiver, Client, User, Visit
 
 
 class ClientForm(forms.ModelForm):
@@ -102,9 +102,11 @@ def admin_dashboard(request):
 def caregiver_dashboard(request):
     caregiver = get_object_or_404(Caregiver, user=request.user)
     clients = Client.objects.filter(is_active=True)
+    visits = Visit.objects.filter(caregiver=caregiver).select_related('client')
     return render(request, 'accounts/caregiver_dashboard.html', {
         'caregiver': caregiver,
         'clients': clients,
+        'visits': visits,
     })
 
 
@@ -191,4 +193,54 @@ def caregiver_delete(request, pk):
         caregiver.user.delete()
         return redirect('caregiver_list')
     return render(request, 'accounts/caregiver_confirm_delete.html', {'caregiver': caregiver})
+
+
+class VisitForm(forms.ModelForm):
+    class Meta:
+        model = Visit
+        fields = ('caregiver', 'client', 'scheduled_date', 'scheduled_time', 'status', 'notes')
+        widgets = {
+            'scheduled_date': forms.DateInput(attrs={'type': 'date'}),
+            'scheduled_time': forms.TimeInput(attrs={'type': 'time'}),
+        }
+
+
+@role_required(User.Role.ADMIN)
+def visit_list(request):
+    visits = Visit.objects.select_related('caregiver', 'client').all()
+    return render(request, 'accounts/visit_list.html', {'visits': visits})
+
+
+@role_required(User.Role.ADMIN)
+def visit_create(request):
+    if request.method == 'POST':
+        form = VisitForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('visit_list')
+    else:
+        form = VisitForm()
+    return render(request, 'accounts/visit_form.html', {'form': form, 'title': 'Schedule Visit'})
+
+
+@role_required(User.Role.ADMIN)
+def visit_update(request, pk):
+    visit = get_object_or_404(Visit, pk=pk)
+    if request.method == 'POST':
+        form = VisitForm(request.POST, instance=visit)
+        if form.is_valid():
+            form.save()
+            return redirect('visit_list')
+    else:
+        form = VisitForm(instance=visit)
+    return render(request, 'accounts/visit_form.html', {'form': form, 'title': 'Edit Visit'})
+
+
+@role_required(User.Role.ADMIN)
+def visit_delete(request, pk):
+    visit = get_object_or_404(Visit, pk=pk)
+    if request.method == 'POST':
+        visit.delete()
+        return redirect('visit_list')
+    return render(request, 'accounts/visit_confirm_delete.html', {'visit': visit})
 

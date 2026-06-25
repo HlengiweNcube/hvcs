@@ -50,3 +50,24 @@ class Client(models.Model):
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
 
+
+class Visit(models.Model):
+    class Status(models.TextChoices):
+        SCHEDULED = 'SCHEDULED', 'Scheduled'
+        COMPLETED = 'COMPLETED', 'Completed'
+        CANCELLED = 'CANCELLED', 'Cancelled'
+
+    caregiver = models.ForeignKey(Caregiver, on_delete=models.CASCADE, related_name='visits')
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='visits')
+    scheduled_date = models.DateField()
+    scheduled_time = models.TimeField()
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.SCHEDULED)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('scheduled_date', 'scheduled_time')
+
+    def __str__(self):
+        return f'{self.scheduled_date} {self.scheduled_time} — {self.caregiver} → {self.client}'
+

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Visits{% endblock %}
+{% block content %}
+    <h1 class="page-title">Visits</h1>
+    <div class="link-row">
+        <a class="button-link" href="/accounts/admin-dashboard/">Back to Admin Dashboard</a>
+        <a class="link-button" href="/accounts/visits/add/">Schedule Visit</a>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Caregiver</th>
+                <th>Client</th>
+                <th>Status</th>
+                <th>Notes</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for visit in visits %}
+                <tr>
+                    <td>{{ visit.scheduled_date }}</td>
+                    <td>{{ visit.scheduled_time }}</td>
+                    <td>{{ visit.caregiver }}</td>
+                    <td>{{ visit.client }}</td>
+                    <td>{{ visit.get_status_display }}</td>
+                    <td>{{ visit.notes|default:"—" }}</td>
+                    <td>
+                        <a href="/accounts/visits/{{ visit.id }}/edit/">Edit</a>
+                        <a href="/accounts/visits/{{ visit.id }}/delete/">Delete</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" class="empty-row">No visits scheduled yet.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

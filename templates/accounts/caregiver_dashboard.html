@@ -36,6 +36,30 @@
     <p class="page-text">No active clients found.</p>
     {% endif %}
 
+    <h2 class="page-title" style="font-size:1.2rem;margin-top:1.5rem;">My Visits</h2>
+    {% if visits %}
+    <table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem;">
+        <tr>
+            <th style="text-align:left;padding:6px;border-bottom:1px solid #ccc;">Date</th>
+            <th style="text-align:left;padding:6px;border-bottom:1px solid #ccc;">Time</th>
+            <th style="text-align:left;padding:6px;border-bottom:1px solid #ccc;">Client</th>
+            <th style="text-align:left;padding:6px;border-bottom:1px solid #ccc;">Status</th>
+            <th style="text-align:left;padding:6px;border-bottom:1px solid #ccc;">Notes</th>
+        </tr>
+        {% for visit in visits %}
+        <tr>
+            <td style="padding:6px;">{{ visit.scheduled_date }}</td>
+            <td style="padding:6px;">{{ visit.scheduled_time }}</td>
+            <td style="padding:6px;">{{ visit.client }}</td>
+            <td style="padding:6px;">{{ visit.get_status_display }}</td>
+            <td style="padding:6px;">{{ visit.notes|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p class="page-text">No visits scheduled.</p>
+    {% endif %}
+
     <div class="link-row">
         <form method="post" action="/accounts/logout/" style="display:inline">{% csrf_token %}<button type="submit" class="button-link">Logout</button></form>
     </div>
