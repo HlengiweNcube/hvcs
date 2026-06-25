@@ -100,7 +100,12 @@ def admin_dashboard(request):
 
 @role_required(User.Role.CAREGIVER)
 def caregiver_dashboard(request):
-    return render(request, 'accounts/caregiver_dashboard.html')
+    caregiver = get_object_or_404(Caregiver, user=request.user)
+    clients = Client.objects.filter(is_active=True)
+    return render(request, 'accounts/caregiver_dashboard.html', {
+        'caregiver': caregiver,
+        'clients': clients,
+    })
 
 
 @role_required(User.Role.MANAGER)

@@ -3,8 +3,39 @@
 {% block main_class %}page page--narrow{% endblock %}
 {% block content %}
     <h1 class="page-title">Caregiver Dashboard</h1>
-    <p class="page-text">Welcome, {{ request.user.username }}.</p>
-    <p class="page-text">This is the caregiver dashboard placeholder for HVCS.</p>
+    <p class="page-text">Welcome, {{ caregiver.first_name }} {{ caregiver.last_name }}.</p>
+
+    <h2 class="page-title" style="font-size:1.2rem;margin-top:1.5rem;">My Profile</h2>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem;">
+        <tr><th style="text-align:left;padding:6px;border-bottom:1px solid #ccc;">Field</th><th style="text-align:left;padding:6px;border-bottom:1px solid #ccc;">Value</th></tr>
+        <tr><td style="padding:6px;">Username</td><td style="padding:6px;">{{ request.user.username }}</td></tr>
+        <tr><td style="padding:6px;">Phone</td><td style="padding:6px;">{{ caregiver.phone|default:"—" }}</td></tr>
+        <tr><td style="padding:6px;">Qualifications</td><td style="padding:6px;">{{ caregiver.qualifications|default:"—" }}</td></tr>
+        <tr><td style="padding:6px;">Status</td><td style="padding:6px;">{% if caregiver.is_active %}Active{% else %}Inactive{% endif %}</td></tr>
+    </table>
+
+    <h2 class="page-title" style="font-size:1.2rem;margin-top:1.5rem;">Active Clients</h2>
+    {% if clients %}
+    <table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem;">
+        <tr>
+            <th style="text-align:left;padding:6px;border-bottom:1px solid #ccc;">Name</th>
+            <th style="text-align:left;padding:6px;border-bottom:1px solid #ccc;">Phone</th>
+            <th style="text-align:left;padding:6px;border-bottom:1px solid #ccc;">Address</th>
+            <th style="text-align:left;padding:6px;border-bottom:1px solid #ccc;">Care Needs</th>
+        </tr>
+        {% for client in clients %}
+        <tr>
+            <td style="padding:6px;">{{ client.first_name }} {{ client.last_name }}</td>
+            <td style="padding:6px;">{{ client.contact_phone|default:"—" }}</td>
+            <td style="padding:6px;">{{ client.address }}</td>
+            <td style="padding:6px;">{{ client.care_needs|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p class="page-text">No active clients found.</p>
+    {% endif %}
+
     <div class="link-row">
         <form method="post" action="/accounts/logout/" style="display:inline">{% csrf_token %}<button type="submit" class="button-link">Logout</button></form>
     </div>
