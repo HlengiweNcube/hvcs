@@ -1,14 +1,7 @@
-<!DOCTYPE html>
-{% load static %}
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete Client</title>
-    <link rel="stylesheet" href="{% static 'accounts/styles.css' %}">
-</head>
-<body>
-    <main class="page page--narrow">
+{% extends "base.html" %}
+{% block title %}Delete Client{% endblock %}
+{% block main_class %}page page--narrow{% endblock %}
+{% block content %}
     <h1 class="page-title">Delete Client</h1>
     <p class="page-text">Are you sure you want to delete {{ client.first_name }} {{ client.last_name }}?</p>
 
@@ -19,6 +12,4 @@
             <a class="button-link" href="/accounts/clients/">Cancel</a>
         </div>
     </form>
-    </main>
-</body>
-</html>
+{% endblock %}

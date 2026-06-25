@@ -1,14 +1,6 @@
-<!DOCTYPE html>
-{% load static %}
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clients</title>
-    <link rel="stylesheet" href="{% static 'accounts/styles.css' %}">
-</head>
-<body>
-    <main class="page">
+{% extends "base.html" %}
+{% block title %}Clients{% endblock %}
+{% block content %}
     <h1 class="page-title">Clients</h1>
     <div class="link-row">
         <a class="button-link" href="/accounts/admin-dashboard/">Back to Admin Dashboard</a>
@@ -46,6 +38,4 @@
             {% endfor %}
         </tbody>
     </table>
-    </main>
-</body>
-</html>
+{% endblock %}

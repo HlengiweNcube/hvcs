@@ -6,7 +6,7 @@ from . import views
 urlpatterns = [
     path('', views.landing, name='accounts_home'),
     path('login/', auth_views.LoginView.as_view(), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('logout/', views.custom_logout, name='logout'),
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('caregiver-dashboard/', views.caregiver_dashboard, name='caregiver_dashboard'),
     path('manager-dashboard/', views.manager_dashboard, name='manager_dashboard'),

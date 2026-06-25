@@ -1,20 +1,11 @@
-<!DOCTYPE html>
-{% load static %}
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manager Dashboard</title>
-    <link rel="stylesheet" href="{% static 'accounts/styles.css' %}">
-</head>
-<body>
-    <main class="page page--narrow">
-        <h1 class="page-title">Manager Dashboard</h1>
-        <p class="page-text">Welcome, {{ request.user.username }}.</p>
-        <p class="page-text">This is the manager dashboard placeholder for HVCS.</p>
-        <div class="link-row">
-            <form method="post" action="/accounts/logout/" style="display:inline">{% csrf_token %}<button type="submit" class="button-link">Logout</button></form>
-        </div>
-    </main>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Manager Dashboard{% endblock %}
+{% block main_class %}page page--narrow{% endblock %}
+{% block content %}
+    <h1 class="page-title">Manager Dashboard</h1>
+    <p class="page-text">Welcome, {{ request.user.username }}.</p>
+    <p class="page-text">This is the manager dashboard placeholder for HVCS.</p>
+    <div class="link-row">
+        <form method="post" action="/accounts/logout/" style="display:inline">{% csrf_token %}<button type="submit" class="button-link">Logout</button></form>
+    </div>
+{% endblock %}

@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth import logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
@@ -69,6 +70,11 @@ class CaregiverUpdateForm(forms.ModelForm):
             caregiver.user.save()
             caregiver.save()
         return caregiver
+
+
+def custom_logout(request):
+    logout(request)
+    return redirect('login')
 
 
 def landing(request):
