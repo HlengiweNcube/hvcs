@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}My Clients{% endblock %}
+{% block content %}
+    <h1 class="page-title">My Clients</h1>
+    <div class="link-row">
+        <a class="button-link" href="/accounts/caregiver-dashboard/">Back to Dashboard</a>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Phone</th>
+                <th>Care Needs</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in clients %}
+                <tr>
+                    <td>{{ client.first_name }} {{ client.last_name }}</td>
+                    <td>{{ client.address }}</td>
+                    <td>{{ client.contact_phone|default:"—" }}</td>
+                    <td>{{ client.care_needs|default:"—" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" class="empty-row">No clients assigned yet.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

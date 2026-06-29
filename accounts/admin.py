@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import Caregiver, Client, User
+from .models import Caregiver, Client, User, Visit
 
 
 @admin.register(User)
@@ -32,3 +32,10 @@ class CaregiverAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name', 'user', 'phone', 'is_active')
     list_filter = ('is_active',)
     search_fields = ('first_name', 'last_name', 'user__username', 'user__email', 'phone')
+
+
+@admin.register(Visit)
+class VisitAdmin(admin.ModelAdmin):
+    list_display = ('scheduled_date', 'scheduled_time', 'caregiver', 'client', 'status')
+    list_filter = ('status', 'scheduled_date')
+    search_fields = ('caregiver__first_name', 'caregiver__last_name', 'client__first_name', 'client__last_name')

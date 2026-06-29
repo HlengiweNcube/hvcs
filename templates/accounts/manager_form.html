@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block main_class %}page page--narrow{% endblock %}
+{% block content %}
+    <h1 class="page-title">{{ title }}</h1>
+    <div class="link-row">
+        <a class="button-link" href="/accounts/managers/">Back to Managers</a>
+    </div>
+
+    <form method="post" class="form-shell">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="button">Save</button>
+    </form>
+{% endblock %}

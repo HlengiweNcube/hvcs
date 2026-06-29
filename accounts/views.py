@@ -77,6 +77,30 @@ def custom_logout(request):
     return redirect('login')
 
 
+class ManagerCreateForm(UserCreationForm):
+    first_name = forms.CharField(max_length=100)
+    last_name = forms.CharField(max_length=100)
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ('username', 'email')
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.role = User.Role.MANAGER
+        user.first_name = self.cleaned_data['first_name']
+        user.last_name = self.cleaned_data['last_name']
+        if commit:
+            user.save()
+        return user
+
+
+class ManagerUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'first_name', 'last_name', 'is_active')
+
+
 def landing(request):
     """HVCS landing page."""
     return render(request, 'accounts/landing.html')
@@ -108,6 +132,27 @@ def caregiver_dashboard(request):
         'clients': clients,
         'visits': visits,
     })
+
+
+@role_required(User.Role.CAREGIVER)
+def caregiver_my_profile(request):
+    caregiver = get_object_or_404(Caregiver, user=request.user)
+    return render(request, 'accounts/caregiver_profile.html', {'caregiver': caregiver})
+
+
+@role_required(User.Role.CAREGIVER)
+def caregiver_my_visits(request):
+    caregiver = get_object_or_404(Caregiver, user=request.user)
+    visits = Visit.objects.filter(caregiver=caregiver).select_related('client')
+    return render(request, 'accounts/caregiver_visits.html', {'caregiver': caregiver, 'visits': visits})
+
+
+@role_required(User.Role.CAREGIVER)
+def caregiver_my_clients(request):
+    caregiver = get_object_or_404(Caregiver, user=request.user)
+    client_ids = Visit.objects.filter(caregiver=caregiver).values_list('client_id', flat=True).distinct()
+    clients = Client.objects.filter(id__in=client_ids, is_active=True)
+    return render(request, 'accounts/caregiver_clients.html', {'caregiver': caregiver, 'clients': clients})
 
 
 @role_required(User.Role.MANAGER)
@@ -243,4 +288,45 @@ def visit_delete(request, pk):
         visit.delete()
         return redirect('visit_list')
     return render(request, 'accounts/visit_confirm_delete.html', {'visit': visit})
+
+
+@role_required(User.Role.ADMIN)
+def manager_list(request):
+    managers = User.objects.filter(role=User.Role.MANAGER)
+    return render(request, 'accounts/manager_list.html', {'managers': managers})
+
+
+@role_required(User.Role.ADMIN)
+def manager_create(request):
+    if request.method == 'POST':
+        form = ManagerCreateForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('manager_list')
+    else:
+        form = ManagerCreateForm()
+    return render(request, 'accounts/manager_form.html', {'form': form, 'title': 'Add Manager'})
+
+
+@role_required(User.Role.ADMIN)
+def manager_update(request, pk):
+    manager = get_object_or_404(User, pk=pk, role=User.Role.MANAGER)
+    if request.method == 'POST':
+        form = ManagerUpdateForm(request.POST, instance=manager)
+        if form.is_valid():
+            form.save()
+            return redirect('manager_list')
+    else:
+        form = ManagerUpdateForm(instance=manager)
+    return render(request, 'accounts/manager_form.html', {'form': form, 'title': 'Edit Manager'})
+
+
+@role_required(User.Role.ADMIN)
+def manager_delete(request, pk):
+    manager = get_object_or_404(User, pk=pk, role=User.Role.MANAGER)
+    if request.method == 'POST':
+        manager.delete()
+        return redirect('manager_list')
+    return render(request, 'accounts/manager_confirm_delete.html', {'manager': manager})
+
 

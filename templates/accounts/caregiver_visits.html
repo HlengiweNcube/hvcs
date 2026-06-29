@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}My Visits{% endblock %}
+{% block content %}
+    <h1 class="page-title">My Visits</h1>
+    <div class="link-row">
+        <a class="button-link" href="/accounts/caregiver-dashboard/">Back to Dashboard</a>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Client</th>
+                <th>Status</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for visit in visits %}
+                <tr>
+                    <td>{{ visit.scheduled_date }}</td>
+                    <td>{{ visit.scheduled_time }}</td>
+                    <td>{{ visit.client }}</td>
+                    <td>{{ visit.get_status_display }}</td>
+                    <td>{{ visit.notes|default:"—" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="empty-row">No visits scheduled.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -16,9 +16,9 @@ def role_required(*roles):
         @wraps(view_func)
         @login_required
         def _wrapped(request, *args, **kwargs):
-            if request.user.role not in roles:
-                raise PermissionDenied
-            return view_func(request, *args, **kwargs)
+            if request.user.is_superuser or request.user.role in roles:
+                return view_func(request, *args, **kwargs)
+            raise PermissionDenied
 
         return _wrapped
 

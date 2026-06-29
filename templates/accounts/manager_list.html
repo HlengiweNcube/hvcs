@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Managers{% endblock %}
+{% block content %}
+    <h1 class="page-title">Managers</h1>
+    <div class="link-row">
+        <a class="button-link" href="/accounts/admin-dashboard/">Back to Admin Dashboard</a>
+        <a class="link-button" href="/accounts/managers/add/">Add Manager</a>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Active</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for manager in managers %}
+                <tr>
+                    <td>{{ manager.username }}</td>
+                    <td>{{ manager.first_name }}</td>
+                    <td>{{ manager.last_name }}</td>
+                    <td>{{ manager.email|default:"—" }}</td>
+                    <td>{{ manager.is_active }}</td>
+                    <td>
+                        <a href="/accounts/managers/{{ manager.id }}/edit/">Edit</a>
+                        <a href="/accounts/managers/{{ manager.id }}/delete/">Delete</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6" class="empty-row">No managers yet.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
