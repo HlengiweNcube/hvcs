@@ -3,6 +3,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from .decorators import role_required
 from .models import Caregiver, Client, User, Visit
@@ -164,7 +165,18 @@ def dashboard(request):
 
 @role_required(User.Role.ADMIN)
 def admin_dashboard(request):
-    return render(request, 'accounts/admin_dashboard.html')
+    today = timezone.now().date()
+    stats = {
+        'total_clients': Client.objects.filter(is_active=True).count(),
+        'total_caregivers': Caregiver.objects.filter(is_active=True).count(),
+        'total_managers': User.objects.filter(role=User.Role.MANAGER).count(),
+        'visits_scheduled': Visit.objects.filter(status=Visit.Status.SCHEDULED).count(),
+        'visits_in_progress': Visit.objects.filter(status=Visit.Status.IN_PROGRESS).count(),
+        'visits_completed': Visit.objects.filter(status=Visit.Status.COMPLETED).count(),
+        'visits_cancelled': Visit.objects.filter(status=Visit.Status.CANCELLED).count(),
+    }
+    todays_visits = Visit.objects.filter(scheduled_date=today).select_related('caregiver', 'client').order_by('scheduled_time')
+    return render(request, 'accounts/admin_dashboard.html', {'stats': stats, 'todays_visits': todays_visits})
 
 
 @role_required(User.Role.CAREGIVER)
@@ -198,6 +210,51 @@ def caregiver_my_clients(request):
     client_ids = Visit.objects.filter(caregiver=caregiver).values_list('client_id', flat=True).distinct()
     clients = Client.objects.filter(id__in=client_ids, is_active=True)
     return render(request, 'accounts/caregiver_clients.html', {'caregiver': caregiver, 'clients': clients})
+
+
+@role_required(User.Role.CAREGIVER)
+def caregiver_visit_detail(request, pk):
+    caregiver = get_object_or_404(Caregiver, user=request.user)
+    visit = get_object_or_404(Visit, pk=pk, caregiver=caregiver)
+    if request.method == 'POST':
+        form = VisitNotesForm(request.POST, instance=visit)
+        if form.is_valid():
+            form.save()
+            return redirect('caregiver_visit_detail', pk=pk)
+    else:
+        form = VisitNotesForm(instance=visit)
+    return render(request, 'accounts/caregiver_visit_detail.html', {'visit': visit, 'form': form})
+
+
+@role_required(User.Role.CAREGIVER)
+def caregiver_checkin(request, pk):
+    if request.method == 'POST':
+        caregiver = get_object_or_404(Caregiver, user=request.user)
+        visit = get_object_or_404(Visit, pk=pk, caregiver=caregiver)
+        if visit.status == Visit.Status.SCHEDULED:
+            try:
+                lat = request.POST.get('lat', '').strip()
+                lng = request.POST.get('lng', '').strip()
+                visit.check_in_lat = lat if lat else None
+                visit.check_in_lng = lng if lng else None
+                visit.check_in_time = timezone.now()
+                visit.status = Visit.Status.IN_PROGRESS
+                visit.save()
+            except Exception:
+                pass
+    return redirect('caregiver_visit_detail', pk=pk)
+
+
+@role_required(User.Role.CAREGIVER)
+def caregiver_checkout(request, pk):
+    if request.method == 'POST':
+        caregiver = get_object_or_404(Caregiver, user=request.user)
+        visit = get_object_or_404(Visit, pk=pk, caregiver=caregiver)
+        if visit.status == Visit.Status.IN_PROGRESS:
+            visit.check_out_time = timezone.now()
+            visit.status = Visit.Status.COMPLETED
+            visit.save()
+    return redirect('caregiver_visit_detail', pk=pk)
 
 
 @role_required(User.Role.MANAGER)
@@ -292,6 +349,15 @@ class VisitForm(forms.ModelForm):
         widgets = {
             'scheduled_date': forms.DateInput(attrs={'type': 'date'}),
             'scheduled_time': forms.TimeInput(attrs={'type': 'time'}),
+        }
+
+
+class VisitNotesForm(forms.ModelForm):
+    class Meta:
+        model = Visit
+        fields = ('notes',)
+        widgets = {
+            'notes': forms.Textarea(attrs={'rows': 4}),
         }
 
 

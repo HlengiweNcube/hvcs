@@ -3,12 +3,55 @@
 {% block content %}
     <h1 class="page-title">Admin Dashboard</h1>
     <p class="page-text">Welcome, {{ request.user.username }}.</p>
-    <p class="page-text">This is the admin dashboard placeholder for HVCS.</p>
+
+    <h2 class="section-title">Overview</h2>
+    <table class="data-table">
+        <thead>
+            <tr><th>Metric</th><th>Count</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Active Clients</td><td>{{ stats.total_clients }}</td></tr>
+            <tr><td>Active Caregivers</td><td>{{ stats.total_caregivers }}</td></tr>
+            <tr><td>Managers</td><td>{{ stats.total_managers }}</td></tr>
+            <tr><td>Visits — Scheduled</td><td>{{ stats.visits_scheduled }}</td></tr>
+            <tr><td>Visits — In Progress</td><td>{{ stats.visits_in_progress }}</td></tr>
+            <tr><td>Visits — Completed</td><td>{{ stats.visits_completed }}</td></tr>
+            <tr><td>Visits — Cancelled</td><td>{{ stats.visits_cancelled }}</td></tr>
+        </tbody>
+    </table>
+
+    <h2 class="section-title">Today's Visits</h2>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Caregiver</th>
+                <th>Client</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for visit in todays_visits %}
+                <tr>
+                    <td>{{ visit.scheduled_time }}</td>
+                    <td>{{ visit.caregiver }}</td>
+                    <td>{{ visit.client }}</td>
+                    <td>{{ visit.get_status_display }}</td>
+                    <td><a href="/accounts/visits/{{ visit.id }}/edit/">Edit</a></td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5" class="empty-row">No visits scheduled for today.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2 class="section-title">Manage</h2>
     <div class="link-row">
-        <a class="link-button" href="/accounts/clients/">Manage Clients (CRUD)</a>
-        <a class="link-button" href="/accounts/caregivers/">Manage Caregivers (CRUD)</a>
-        <a class="link-button" href="/accounts/visits/">Manage Visits</a>
-        <a class="link-button" href="/accounts/managers/">Manage Managers</a>
+        <a class="link-button" href="/accounts/clients/">Clients</a>
+        <a class="link-button" href="/accounts/caregivers/">Caregivers</a>
+        <a class="link-button" href="/accounts/visits/">All Visits</a>
+        <a class="link-button" href="/accounts/managers/">Managers</a>
         <form method="post" action="/accounts/logout/" style="display:inline">{% csrf_token %}<button type="submit" class="button-link">Logout</button></form>
     </div>
 {% endblock %}

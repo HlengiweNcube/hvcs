@@ -54,6 +54,7 @@ class Client(models.Model):
 class Visit(models.Model):
     class Status(models.TextChoices):
         SCHEDULED = 'SCHEDULED', 'Scheduled'
+        IN_PROGRESS = 'IN_PROGRESS', 'In Progress'
         COMPLETED = 'COMPLETED', 'Completed'
         CANCELLED = 'CANCELLED', 'Cancelled'
 
@@ -63,6 +64,10 @@ class Visit(models.Model):
     scheduled_time = models.TimeField()
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.SCHEDULED)
     notes = models.TextField(blank=True)
+    check_in_lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    check_in_lng = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    check_in_time = models.DateTimeField(null=True, blank=True)
+    check_out_time = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Visit Detail{% endblock %}
+{% block content %}
+    <h1 class="page-title">Visit Detail</h1>
+    <div class="link-row">
+        <a class="button-link" href="{% url 'caregiver_my_visits' %}">Back to My Visits</a>
+    </div>
+
+    <table class="data-table">
+        <tbody>
+            <tr><th>Client</th><td>{{ visit.client }}</td></tr>
+            <tr><th>Date</th><td>{{ visit.scheduled_date }}</td></tr>
+            <tr><th>Time</th><td>{{ visit.scheduled_time }}</td></tr>
+            <tr><th>Status</th><td>{{ visit.get_status_display }}</td></tr>
+            {% if visit.check_in_time %}
+                <tr><th>Checked In</th><td>{{ visit.check_in_time }}</td></tr>
+                {% if visit.check_in_lat %}
+                    <tr><th>GPS</th><td>{{ visit.check_in_lat }}, {{ visit.check_in_lng }}</td></tr>
+                {% endif %}
+            {% endif %}
+            {% if visit.check_out_time %}
+                <tr><th>Checked Out</th><td>{{ visit.check_out_time }}</td></tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+    {% if visit.status == 'SCHEDULED' %}
+        <h2 class="section-title">Check In</h2>
+        <form id="checkin-form" method="post" action="{% url 'caregiver_checkin' visit.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="lat" id="checkin-lat">
+            <input type="hidden" name="lng" id="checkin-lng">
+            <button type="button" class="button" onclick="doCheckin()">Check In (with GPS)</button>
+            <button type="submit" class="button" style="margin-left:8px">Check In (no GPS)</button>
+        </form>
+    {% elif visit.status == 'IN_PROGRESS' %}
+        <h2 class="section-title">Check Out</h2>
+        <form method="post" action="{% url 'caregiver_checkout' visit.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="button">Check Out</button>
+        </form>
+    {% endif %}
+
+    <h2 class="section-title">Notes</h2>
+    <form method="post" class="form-shell">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="button">Save Notes</button>
+    </form>
+
+    <script>
+        function doCheckin() {
+            if (!navigator.geolocation) {
+                document.getElementById('checkin-form').submit();
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                function(pos) {
+                    document.getElementById('checkin-lat').value = pos.coords.latitude.toFixed(6);
+                    document.getElementById('checkin-lng').value = pos.coords.longitude.toFixed(6);
+                    document.getElementById('checkin-form').submit();
+                },
+                function() {
+                    document.getElementById('checkin-form').submit();
+                }
+            );
+        }
+    </script>
+{% endblock %}
