@@ -24,23 +24,19 @@ class Command(BaseCommand):
         recorder.ensure_schema()
         applied = {(m.app, m.name) for m in recorder.migration_qs}
 
-        # Migrations whose schema already exists in production but may not be
-        # recorded in django_migrations (e.g. after a custom user model swap).
-        to_fake = [
-            ('accounts', '0001_initial'),
-            ('accounts', '0002_client'),
-            ('accounts', '0003_caregiver'),
-            ('accounts', '0004_align_client_to_erd'),
-            ('accounts', '0005_visit'),
+        # Each entry: (app, name, condition) — only fake if condition is True,
+        # meaning the schema changes from that migration already exist in the DB.
+        candidates = [
+            ('accounts', '0001_initial',              _table_exists('accounts_user')),
+            ('accounts', '0002_client',               _table_exists('accounts_client')),
+            ('accounts', '0003_caregiver',            _table_exists('accounts_caregiver')),
+            ('accounts', '0004_align_client_to_erd',  _column_exists('accounts_client', 'care_needs')),
+            ('accounts', '0005_visit',                _table_exists('accounts_visit')),
+            ('accounts', '0006_visit_gps_checkin',    _column_exists('accounts_visit', 'check_in_lat')),
         ]
 
-        # Only fake 0006 if the GPS columns already exist in the DB.
-        # On Render (production) they don't exist yet, so migrate will add them.
-        if _column_exists('accounts_visit', 'check_in_lat'):
-            to_fake.append(('accounts', '0006_visit_gps_checkin'))
-
-        for app, name in to_fake:
-            if (app, name) not in applied:
+        for app, name, already_exists in candidates:
+            if already_exists and (app, name) not in applied:
                 recorder.record_applied(app, name)
                 self.stdout.write(self.style.WARNING(f'Faked missing migration: {app}.{name}'))
 
