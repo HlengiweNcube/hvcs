@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}HVCS Register{% endblock %}
+{% block main_class %}page page--narrow{% endblock %}
+{% block content %}
+    <h1 class="page-title">Create an Account</h1>
+    <p class="page-text">Register as a Caregiver to access the system.</p>
+    <form method="post" class="form-shell">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="button">Register</button>
+    </form>
+    <p class="page-text">Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
+{% endblock %}

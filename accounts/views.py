@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth import logout
+from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
@@ -75,6 +75,51 @@ class CaregiverUpdateForm(forms.ModelForm):
 def custom_logout(request):
     logout(request)
     return redirect('login')
+
+
+class SelfRegisterForm(UserCreationForm):
+    first_name = forms.CharField(max_length=100)
+    last_name = forms.CharField(max_length=100)
+    email = forms.EmailField(required=False)
+    phone = forms.CharField(max_length=30, required=False)
+    qualifications = forms.CharField(max_length=255, required=False)
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ('username', 'email')
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.role = User.Role.CAREGIVER
+        user.first_name = self.cleaned_data['first_name']
+        user.last_name = self.cleaned_data['last_name']
+        user.email = self.cleaned_data['email']
+        user.is_active = True
+        if commit:
+            user.save()
+            Caregiver.objects.create(
+                user=user,
+                first_name=self.cleaned_data['first_name'],
+                last_name=self.cleaned_data['last_name'],
+                phone=self.cleaned_data['phone'],
+                qualifications=self.cleaned_data['qualifications'],
+                is_active=True,
+            )
+        return user
+
+
+def register(request):
+    if request.user.is_authenticated:
+        return redirect('accounts_home')
+    if request.method == 'POST':
+        form = SelfRegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('caregiver_dashboard')
+    else:
+        form = SelfRegisterForm()
+    return render(request, 'registration/register.html', {'form': form})
 
 
 class ManagerCreateForm(UserCreationForm):
