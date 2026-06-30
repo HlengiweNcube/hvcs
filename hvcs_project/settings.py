@@ -50,14 +50,14 @@ if render_host and render_host not in ALLOWED_HOSTS:
 # Application definition
 
 INSTALLED_APPS = [
+    'accounts',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts',
-   ]
+    'django.contrib.humanize',]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
