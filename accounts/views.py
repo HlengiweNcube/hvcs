@@ -166,7 +166,41 @@ def dashboard(request):
 @role_required(User.Role.ADMIN)
 def admin_dashboard(request):
     today = timezone.now().date()
+    now = timezone.now()
     week_ago = today - timezone.timedelta(days=7)
+
+    # --- Alerts -------------------------------------------------------
+    # 1. Missed check-in: scheduled today, time passed 15+ min, still SCHEDULED
+    cutoff = now - timezone.timedelta(minutes=15)
+    missed_checkin = (
+        Visit.objects.filter(
+            scheduled_date=today,
+            status=Visit.Status.SCHEDULED,
+        )
+        .select_related('caregiver', 'client')
+        .order_by('scheduled_time')
+    )
+    missed_checkin = [
+        v for v in missed_checkin
+        if timezone.make_aware(
+            timezone.datetime.combine(today, v.scheduled_time)
+        ) <= cutoff
+    ]
+
+    # 2. Never-started: scheduled_date < today and still SCHEDULED
+    never_started = (
+        Visit.objects.filter(
+            scheduled_date__lt=today,
+            status=Visit.Status.SCHEDULED,
+        )
+        .select_related('caregiver', 'client')
+        .order_by('-scheduled_date')
+    )
+    alerts = {
+        'missed_checkin': missed_checkin,
+        'never_started': never_started,
+    }
+    # ------------------------------------------------------------------
 
     stats = {
         'total_clients': Client.objects.filter(is_active=True).count(),
@@ -205,6 +239,7 @@ def admin_dashboard(request):
         'todays_visits': todays_visits,
         'recent_visits': recent_visits,
         'compliance_rate': compliance_rate,
+        'alerts': alerts,
     })
 
 
@@ -288,7 +323,48 @@ def caregiver_checkout(request, pk):
 
 @role_required(User.Role.MANAGER)
 def manager_dashboard(request):
-    return render(request, 'accounts/manager_dashboard.html')
+    today = timezone.now().date()
+    now = timezone.now()
+    cutoff = now - timezone.timedelta(minutes=15)
+
+    missed_checkin = (
+        Visit.objects.filter(
+            scheduled_date=today,
+            status=Visit.Status.SCHEDULED,
+        )
+        .select_related('caregiver', 'client')
+        .order_by('scheduled_time')
+    )
+    missed_checkin = [
+        v for v in missed_checkin
+        if timezone.make_aware(
+            timezone.datetime.combine(today, v.scheduled_time)
+        ) <= cutoff
+    ]
+
+    never_started = (
+        Visit.objects.filter(
+            scheduled_date__lt=today,
+            status=Visit.Status.SCHEDULED,
+        )
+        .select_related('caregiver', 'client')
+        .order_by('-scheduled_date')
+    )
+
+    todays_visits = (
+        Visit.objects.filter(scheduled_date=today)
+        .select_related('caregiver', 'client')
+        .order_by('scheduled_time')
+    )
+
+    alerts = {
+        'missed_checkin': missed_checkin,
+        'never_started': never_started,
+    }
+    return render(request, 'accounts/manager_dashboard.html', {
+        'alerts': alerts,
+        'todays_visits': todays_visits,
+    })
 
 
 @role_required(User.Role.ADMIN)

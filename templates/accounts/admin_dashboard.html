@@ -4,6 +4,28 @@
     <h1 class="page-title">Admin Dashboard</h1>
     <p class="page-text">Welcome, {{ request.user.username }}.</p>
 
+    {% if alerts.missed_checkin %}
+    <div class="alert alert--warning">
+        <strong>Missed Check-in ({{ alerts.missed_checkin|length }})</strong> — the following visits were scheduled today but the caregiver has not checked in:
+        <ul>
+            {% for v in alerts.missed_checkin %}
+                <li>{{ v.scheduled_time }} &mdash; {{ v.caregiver }} &rarr; {{ v.client }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if alerts.never_started %}
+    <div class="alert alert--danger">
+        <strong>Never Started ({{ alerts.never_started|length }})</strong> — these past visits were never checked in and remain Scheduled:
+        <ul>
+            {% for v in alerts.never_started %}
+                <li>{{ v.scheduled_date }} {{ v.scheduled_time }} &mdash; {{ v.caregiver }} &rarr; {{ v.client }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
     <h2 class="section-title">Overview</h2>
     <table class="data-table">
         <thead>

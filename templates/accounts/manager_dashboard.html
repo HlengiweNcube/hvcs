@@ -4,7 +4,54 @@
 {% block content %}
     <h1 class="page-title">Manager Dashboard</h1>
     <p class="page-text">Welcome, {{ request.user.username }}.</p>
-    <p class="page-text">This is the manager dashboard placeholder for HVCS.</p>
+
+    {% if alerts.missed_checkin %}
+    <div class="alert alert--warning">
+        <strong>Missed Check-in ({{ alerts.missed_checkin|length }})</strong> — scheduled today but not yet checked in:
+        <ul>
+            {% for v in alerts.missed_checkin %}
+                <li>{{ v.scheduled_time }} &mdash; {{ v.caregiver }} &rarr; {{ v.client }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if alerts.never_started %}
+    <div class="alert alert--danger">
+        <strong>Never Started ({{ alerts.never_started|length }})</strong> — past visits that were never checked in:
+        <ul>
+            {% for v in alerts.never_started %}
+                <li>{{ v.scheduled_date }} {{ v.scheduled_time }} &mdash; {{ v.caregiver }} &rarr; {{ v.client }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if not alerts.missed_checkin and not alerts.never_started %}
+    <div class="alert alert--success">All visits are on track. No alerts.</div>
+    {% endif %}
+
+    <h2 class="section-title">Today's Visits</h2>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Time</th><th>Caregiver</th><th>Client</th><th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for visit in todays_visits %}
+                <tr>
+                    <td>{{ visit.scheduled_time }}</td>
+                    <td>{{ visit.caregiver }}</td>
+                    <td>{{ visit.client }}</td>
+                    <td>{{ visit.get_status_display }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="4" class="empty-row">No visits scheduled for today.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
     <div class="link-row">
         <form method="post" action="/accounts/logout/" style="display:inline">{% csrf_token %}<button type="submit" class="button-link">Logout</button></form>
     </div>

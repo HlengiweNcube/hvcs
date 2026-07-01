@@ -95,6 +95,36 @@ body {
     color: #6b7280;
 }
 
+/* ---- Auto-alert banners ---- */
+.alert {
+    margin-bottom: 20px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    border-left: 5px solid;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+.alert ul {
+    margin: 8px 0 0 20px;
+    padding: 0;
+}
+.alert--warning {
+    background: #fffbeb;
+    border-color: #f59e0b;
+    color: #92400e;
+}
+.alert--danger {
+    background: #fef2f2;
+    border-color: #ef4444;
+    color: #7f1d1d;
+}
+.alert--success {
+    background: #f0fdf4;
+    border-color: #22c55e;
+    color: #14532d;
+}
+
+
 .form-shell p {
     margin: 0 0 14px;
 }
