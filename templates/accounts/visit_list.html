@@ -7,6 +7,21 @@
         <a class="link-button" href="/accounts/visits/add/">Schedule Visit</a>
     </div>
 
+    <form method="get" class="form-shell">
+        <label>From: <input type="date" name="date_from" value="{{ date_from }}"></label>
+        <label>To: <input type="date" name="date_to" value="{{ date_to }}"></label>
+        <label>Status:
+            <select name="status">
+                <option value="">All</option>
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if value == status_filter %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <button type="submit" class="button">Filter</button>
+        <a class="button-link" href="/accounts/visits/">Clear</a>
+    </form>
+
     <table class="data-table">
         <thead>
             <tr>
@@ -35,7 +50,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="7" class="empty-row">No visits scheduled yet.</td>
+                    <td colspan="7" class="empty-row">No visits found.</td>
                 </tr>
             {% endfor %}
         </tbody>

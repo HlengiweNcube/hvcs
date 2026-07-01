@@ -17,6 +17,7 @@
             <tr><td>Visits — In Progress</td><td>{{ stats.visits_in_progress }}</td></tr>
             <tr><td>Visits — Completed</td><td>{{ stats.visits_completed }}</td></tr>
             <tr><td>Visits — Cancelled</td><td>{{ stats.visits_cancelled }}</td></tr>
+            <tr><td><strong>Compliance Rate (last 7 days)</strong></td><td><strong>{{ compliance_rate }}%</strong></td></tr>
         </tbody>
     </table>
 
@@ -42,6 +43,34 @@
                 </tr>
             {% empty %}
                 <tr><td colspan="5" class="empty-row">No visits scheduled for today.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2 class="section-title">Last 7 Days</h2>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Caregiver</th>
+                <th>Client</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for visit in recent_visits %}
+                <tr>
+                    <td>{{ visit.scheduled_date }}</td>
+                    <td>{{ visit.scheduled_time }}</td>
+                    <td>{{ visit.caregiver }}</td>
+                    <td>{{ visit.client }}</td>
+                    <td>{{ visit.get_status_display }}</td>
+                    <td><a href="/accounts/visits/{{ visit.id }}/edit/">Edit</a></td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="6" class="empty-row">No visits in the last 7 days.</td></tr>
             {% endfor %}
         </tbody>
     </table>

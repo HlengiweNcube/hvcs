@@ -166,6 +166,8 @@ def dashboard(request):
 @role_required(User.Role.ADMIN)
 def admin_dashboard(request):
     today = timezone.now().date()
+    week_ago = today - timezone.timedelta(days=7)
+
     stats = {
         'total_clients': Client.objects.filter(is_active=True).count(),
         'total_caregivers': Caregiver.objects.filter(is_active=True).count(),
@@ -175,8 +177,35 @@ def admin_dashboard(request):
         'visits_completed': Visit.objects.filter(status=Visit.Status.COMPLETED).count(),
         'visits_cancelled': Visit.objects.filter(status=Visit.Status.CANCELLED).count(),
     }
-    todays_visits = Visit.objects.filter(scheduled_date=today).select_related('caregiver', 'client').order_by('scheduled_time')
-    return render(request, 'accounts/admin_dashboard.html', {'stats': stats, 'todays_visits': todays_visits})
+
+    # Compliance rate: completed / (completed + cancelled) over last 7 days
+    recent_done = Visit.objects.filter(
+        scheduled_date__gte=week_ago,
+        status__in=[Visit.Status.COMPLETED, Visit.Status.CANCELLED],
+    ).count()
+    recent_completed = Visit.objects.filter(
+        scheduled_date__gte=week_ago,
+        status=Visit.Status.COMPLETED,
+    ).count()
+    compliance_rate = round((recent_completed / recent_done * 100) if recent_done else 0)
+
+    todays_visits = (
+        Visit.objects.filter(scheduled_date=today)
+        .select_related('caregiver', 'client')
+        .order_by('scheduled_time')
+    )
+    recent_visits = (
+        Visit.objects.filter(scheduled_date__gte=week_ago, scheduled_date__lt=today)
+        .select_related('caregiver', 'client')
+        .order_by('-scheduled_date', 'scheduled_time')
+    )
+
+    return render(request, 'accounts/admin_dashboard.html', {
+        'stats': stats,
+        'todays_visits': todays_visits,
+        'recent_visits': recent_visits,
+        'compliance_rate': compliance_rate,
+    })
 
 
 @role_required(User.Role.CAREGIVER)
@@ -364,7 +393,26 @@ class VisitNotesForm(forms.ModelForm):
 @role_required(User.Role.ADMIN)
 def visit_list(request):
     visits = Visit.objects.select_related('caregiver', 'client').all()
-    return render(request, 'accounts/visit_list.html', {'visits': visits})
+
+    # Optional filters
+    date_from = request.GET.get('date_from', '').strip()
+    date_to = request.GET.get('date_to', '').strip()
+    status_filter = request.GET.get('status', '').strip()
+
+    if date_from:
+        visits = visits.filter(scheduled_date__gte=date_from)
+    if date_to:
+        visits = visits.filter(scheduled_date__lte=date_to)
+    if status_filter:
+        visits = visits.filter(status=status_filter)
+
+    return render(request, 'accounts/visit_list.html', {
+        'visits': visits,
+        'date_from': date_from,
+        'date_to': date_to,
+        'status_filter': status_filter,
+        'status_choices': Visit.Status.choices,
+    })
 
 
 @role_required(User.Role.ADMIN)
