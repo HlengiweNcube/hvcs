@@ -3,14 +3,6 @@
 {% block content %}
     <h1 class="page-title">Compliance Dashboard</h1>
 
-    {# --- Date range filter --- #}
-    <form method="get" class="form-shell" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:24px;">
-        <label>From: <input type="date" name="date_from" value="{{ date_from }}"></label>
-        <label>To: <input type="date" name="date_to" value="{{ date_to }}"></label>
-        <button type="submit" class="button">Apply</button>
-        <a class="button-link" href="/accounts/compliance/">Reset</a>
-    </form>
-
     {# --- Overall summary cards --- #}
     <div class="compliance-cards">
         <div class="compliance-card">
@@ -34,6 +26,14 @@
             <span class="compliance-card__label">Overall Rate</span>
         </div>
     </div>
+
+    {# --- Date range filter --- #}
+    <form method="get" class="form-shell" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:24px;">
+        <label>From: <input type="date" name="date_from" value="{{ date_from }}"></label>
+        <label>To: <input type="date" name="date_to" value="{{ date_to }}"></label>
+        <button type="submit" class="button">Apply</button>
+        <a class="button-link" href="/accounts/compliance/">Reset</a>
+    </form>
 
     {# --- Per-caregiver table --- #}
     <h2 class="section-title">Per-Caregiver Breakdown</h2>
