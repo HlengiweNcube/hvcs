@@ -4,6 +4,15 @@
     <h1 class="page-title">Admin Dashboard</h1>
     <p class="page-text">Welcome, {{ request.user.username }}.</p>
 
+    <div class="link-row">
+        <a class="link-button" href="/accounts/clients/">Clients</a>
+        <a class="link-button" href="/accounts/caregivers/">Caregivers</a>
+        <a class="link-button" href="/accounts/visits/">All Visits</a>
+        <a class="link-button" href="/accounts/managers/">Managers</a>
+        <a class="link-button" href="/accounts/compliance/">Compliance</a>
+        <form method="post" action="/accounts/logout/" style="display:inline">{% csrf_token %}<button type="submit" class="button-link">Logout</button></form>
+    </div>
+
     {% if alerts.missed_checkin %}
     <div class="alert alert--warning">
         <strong>Missed Check-in ({{ alerts.missed_checkin|length }})</strong> — the following visits were scheduled today but the caregiver has not checked in:
@@ -97,13 +106,4 @@
         </tbody>
     </table>
 
-    <h2 class="section-title">Manage</h2>
-    <div class="link-row">
-        <a class="link-button" href="/accounts/clients/">Clients</a>
-        <a class="link-button" href="/accounts/caregivers/">Caregivers</a>
-        <a class="link-button" href="/accounts/visits/">All Visits</a>
-        <a class="link-button" href="/accounts/managers/">Managers</a>
-        <a class="link-button" href="/accounts/compliance/">Compliance</a>
-        <form method="post" action="/accounts/logout/" style="display:inline">{% csrf_token %}<button type="submit" class="button-link">Logout</button></form>
-    </div>
 {% endblock %}
