@@ -29,8 +29,8 @@
             <span class="compliance-card__value">{{ summary.cancelled }}</span>
             <span class="compliance-card__label">Cancelled</span>
         </div>
-        <div class="compliance-card {% if summary.overall_rate >= 80 %}compliance-card--green{% elif summary.overall_rate >= 60 %}compliance-card--amber{% else %}compliance-card--red{% endif %}">
-            <span class="compliance-card__value">{{ summary.overall_rate }}%</span>
+        <div class="compliance-card {% if summary.overall_rate is None %}compliance-card--grey{% elif summary.overall_rate >= 80 %}compliance-card--green{% elif summary.overall_rate >= 60 %}compliance-card--amber{% else %}compliance-card--red{% endif %}">
+            <span class="compliance-card__value">{% if summary.overall_rate is None %}N/A{% else %}{{ summary.overall_rate }}%{% endif %}</span>
             <span class="compliance-card__label">Overall Rate</span>
         </div>
     </div>
@@ -81,9 +81,13 @@
                     {% endif %}
                 </td>
                 <td>
-                    <span class="compliance-rate {% if row.rate >= 80 %}compliance-rate--good{% elif row.rate >= 60 %}compliance-rate--ok{% else %}compliance-rate--poor{% endif %}">
-                        {{ row.rate }}%
-                    </span>
+                    {% if row.rate is None %}
+                        <span class="compliance-rate compliance-rate--na">N/A</span>
+                    {% else %}
+                        <span class="compliance-rate {% if row.rate >= 80 %}compliance-rate--good{% elif row.rate >= 60 %}compliance-rate--ok{% else %}compliance-rate--poor{% endif %}">
+                            {{ row.rate }}%
+                        </span>
+                    {% endif %}
                 </td>
             </tr>
             {% empty %}

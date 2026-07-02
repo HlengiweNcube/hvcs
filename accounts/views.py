@@ -410,8 +410,9 @@ def compliance_dashboard(request):
                 late += 1
 
         no_notes = cv.filter(status=Visit.Status.COMPLETED, notes='').count()
-        closed = completed + cancelled
-        rate = round((completed / closed * 100) if closed else 0)
+        # Exclude cancelled — not the caregiver's fault. N/A if nothing to measure.
+        expected_to_complete = assigned - cancelled
+        rate = round(completed / expected_to_complete * 100) if expected_to_complete > 0 else None
 
         caregiver_stats.append({
             'caregiver': caregiver,
@@ -430,8 +431,8 @@ def compliance_dashboard(request):
     total_completed = visits_qs.filter(status=Visit.Status.COMPLETED).count()
     total_cancelled = visits_qs.filter(status=Visit.Status.CANCELLED).count()
     total_missed    = visits_qs.filter(status=Visit.Status.SCHEDULED, scheduled_date__lt=today).count()
-    total_closed    = total_completed + total_cancelled
-    overall_rate    = round((total_completed / total_closed * 100) if total_closed else 0)
+    total_closed    = total_assigned - total_cancelled
+    overall_rate    = round(total_completed / total_closed * 100) if total_closed > 0 else None
 
     return render(request, 'accounts/compliance_dashboard.html', {
         'caregiver_stats': caregiver_stats,
