@@ -367,6 +367,86 @@ def manager_dashboard(request):
     })
 
 
+@role_required(User.Role.ADMIN, User.Role.MANAGER)
+def compliance_dashboard(request):
+    today = timezone.now().date()
+
+    # Default date range: last 30 days
+    default_from = today - timezone.timedelta(days=30)
+    date_from_str = request.GET.get('date_from', str(default_from))
+    date_to_str = request.GET.get('date_to', str(today))
+
+    try:
+        date_from = timezone.datetime.strptime(date_from_str, '%Y-%m-%d').date()
+    except ValueError:
+        date_from = default_from
+    try:
+        date_to = timezone.datetime.strptime(date_to_str, '%Y-%m-%d').date()
+    except ValueError:
+        date_to = today
+
+    visits_qs = Visit.objects.filter(
+        scheduled_date__gte=date_from,
+        scheduled_date__lte=date_to,
+    ).select_related('caregiver', 'client')
+
+    # Per-caregiver breakdown
+    caregiver_stats = []
+    for caregiver in Caregiver.objects.filter(is_active=True).select_related('user').order_by('last_name', 'first_name'):
+        cv = visits_qs.filter(caregiver=caregiver)
+        assigned   = cv.count()
+        completed  = cv.filter(status=Visit.Status.COMPLETED).count()
+        cancelled  = cv.filter(status=Visit.Status.CANCELLED).count()
+        missed     = cv.filter(status=Visit.Status.SCHEDULED, scheduled_date__lt=today).count()
+        in_progress = cv.filter(status=Visit.Status.IN_PROGRESS).count()
+
+        # Late check-in: check_in_time more than 15 min after scheduled
+        late = 0
+        for v in cv.filter(check_in_time__isnull=False):
+            expected = timezone.make_aware(
+                timezone.datetime.combine(v.scheduled_date, v.scheduled_time)
+            )
+            if v.check_in_time > expected + timezone.timedelta(minutes=15):
+                late += 1
+
+        no_notes = cv.filter(status=Visit.Status.COMPLETED, notes='').count()
+        closed = completed + cancelled
+        rate = round((completed / closed * 100) if closed else 0)
+
+        caregiver_stats.append({
+            'caregiver': caregiver,
+            'assigned': assigned,
+            'completed': completed,
+            'cancelled': cancelled,
+            'missed': missed,
+            'in_progress': in_progress,
+            'late': late,
+            'no_notes': no_notes,
+            'rate': rate,
+        })
+
+    # Overall summary
+    total_assigned  = visits_qs.count()
+    total_completed = visits_qs.filter(status=Visit.Status.COMPLETED).count()
+    total_cancelled = visits_qs.filter(status=Visit.Status.CANCELLED).count()
+    total_missed    = visits_qs.filter(status=Visit.Status.SCHEDULED, scheduled_date__lt=today).count()
+    total_closed    = total_completed + total_cancelled
+    overall_rate    = round((total_completed / total_closed * 100) if total_closed else 0)
+
+    return render(request, 'accounts/compliance_dashboard.html', {
+        'caregiver_stats': caregiver_stats,
+        'date_from': date_from_str,
+        'date_to': date_to_str,
+        'summary': {
+            'assigned': total_assigned,
+            'completed': total_completed,
+            'cancelled': total_cancelled,
+            'missed': total_missed,
+            'overall_rate': overall_rate,
+        },
+    })
+
+
 @role_required(User.Role.ADMIN)
 def client_list(request):
     clients = Client.objects.all()

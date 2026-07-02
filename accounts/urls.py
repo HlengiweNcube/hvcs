@@ -17,6 +17,7 @@ urlpatterns = [
     path('caregiver-dashboard/visits/<int:pk>/checkout/', views.caregiver_checkout, name='caregiver_checkout'),
     path('caregiver-dashboard/clients/', views.caregiver_my_clients, name='caregiver_my_clients'),
     path('manager-dashboard/', views.manager_dashboard, name='manager_dashboard'),
+    path('compliance/', views.compliance_dashboard, name='compliance_dashboard'),
     path('clients/', views.client_list, name='client_list'),
     path('clients/add/', views.client_create, name='client_create'),
     path('clients/<int:pk>/edit/', views.client_update, name='client_update'),

@@ -124,6 +124,60 @@ body {
     color: #14532d;
 }
 
+/* ---- Compliance dashboard ---- */
+.compliance-cards {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+.compliance-card {
+    flex: 1 1 120px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    padding: 18px 20px;
+    text-align: center;
+    border-top: 4px solid #94a3b8;
+}
+.compliance-card--green  { border-color: #22c55e; background: #f0fdf4; }
+.compliance-card--red    { border-color: #ef4444; background: #fef2f2; }
+.compliance-card--amber  { border-color: #f59e0b; background: #fffbeb; }
+.compliance-card--grey   { border-color: #94a3b8; }
+.compliance-card__value {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+.compliance-card__label {
+    display: block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+.badge--red   { background: #fecaca; color: #991b1b; }
+.badge--amber { background: #fde68a; color: #92400e; }
+
+.compliance-rate {
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+.compliance-rate--good { background: #dcfce7; color: #166534; }
+.compliance-rate--ok   { background: #fef9c3; color: #854d0e; }
+.compliance-rate--poor { background: #fee2e2; color: #991b1b; }
+
+
 
 .form-shell p {
     margin: 0 0 14px;
