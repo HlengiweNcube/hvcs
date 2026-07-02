@@ -88,6 +88,39 @@ class AuthTests(TestCase):
         response = self.client.get('/accounts/admin-dashboard/')
         self.assertEqual(response.status_code, 403)
 
+    # --- Fallback: caregiver login failure scenarios ---
+
+    def test_caregiver_login_wrong_password_stays_on_login(self):
+        """Caregiver submits the correct username but wrong password — stays on login page."""
+        make_caregiver_user()
+        response = self.client.post('/accounts/login/', {
+            'username': 'caregiver',
+            'password': 'wrongpassword',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_caregiver_login_nonexistent_user_stays_on_login(self):
+        """Caregiver submits credentials for a username that does not exist."""
+        response = self.client.post('/accounts/login/', {
+            'username': 'nobody',
+            'password': 'pass',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_inactive_caregiver_cannot_login(self):
+        """A caregiver whose account has been deactivated is refused login."""
+        user, _ = make_caregiver_user()
+        user.is_active = False
+        user.save()
+        response = self.client.post('/accounts/login/', {
+            'username': 'caregiver',
+            'password': 'pass',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
 
 # ---------------------------------------------------------------------------
 # Self-registration tests

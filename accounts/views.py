@@ -1,7 +1,9 @@
 from django import forms
+from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -357,6 +359,8 @@ def manager_dashboard(request):
         .order_by('scheduled_time')
     )
 
+    caregivers = Caregiver.objects.filter(is_active=True).select_related('user').order_by('last_name', 'first_name')
+
     alerts = {
         'missed_checkin': missed_checkin,
         'never_started': never_started,
@@ -364,6 +368,7 @@ def manager_dashboard(request):
     return render(request, 'accounts/manager_dashboard.html', {
         'alerts': alerts,
         'todays_visits': todays_visits,
+        'caregivers': caregivers,
     })
 
 
@@ -644,5 +649,53 @@ def manager_delete(request, pk):
         manager.delete()
         return redirect('manager_list')
     return render(request, 'accounts/manager_confirm_delete.html', {'manager': manager})
+
+
+@role_required(User.Role.MANAGER)
+def send_schedule_email(request):
+    """Fallback: manager sends a caregiver's upcoming schedule by email."""
+    if request.method != 'POST':
+        return redirect('manager_dashboard')
+
+    caregiver_id = request.POST.get('caregiver_id', '').strip()
+    caregiver = get_object_or_404(Caregiver, pk=caregiver_id, is_active=True)
+
+    email_address = caregiver.user.email
+    if not email_address:
+        messages.error(request, f'{caregiver} has no email address on record.')
+        return redirect('manager_dashboard')
+
+    today = timezone.now().date()
+    upcoming = (
+        Visit.objects.filter(
+            caregiver=caregiver,
+            scheduled_date__gte=today,
+            status=Visit.Status.SCHEDULED,
+        )
+        .select_related('client')
+        .order_by('scheduled_date', 'scheduled_time')
+    )
+
+    if not upcoming.exists():
+        messages.warning(request, f'No upcoming scheduled visits found for {caregiver}.')
+        return redirect('manager_dashboard')
+
+    lines = [f'Hi {caregiver.first_name},\n']
+    lines.append('Here is your upcoming visit schedule:\n')
+    for v in upcoming:
+        lines.append(f'  {v.scheduled_date}  {v.scheduled_time}  —  {v.client}')
+    lines.append('\nPlease log in to the HVCS system to check in for each visit.')
+    lines.append('If you have trouble logging in, contact your manager immediately.')
+
+    send_mail(
+        subject='Your HVCS Visit Schedule',
+        message='\n'.join(lines),
+        from_email=None,   # uses DEFAULT_FROM_EMAIL
+        recipient_list=[email_address],
+        fail_silently=False,
+    )
+
+    messages.success(request, f'Schedule emailed to {caregiver} ({email_address}).')
+    return redirect('manager_dashboard')
 
 

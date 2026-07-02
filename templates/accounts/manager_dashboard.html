@@ -56,4 +56,27 @@
         <a class="link-button" href="/accounts/compliance/">Compliance Dashboard</a>
         <form method="post" action="/accounts/logout/" style="display:inline">{% csrf_token %}<button type="submit" class="button-link">Logout</button></form>
     </div>
+
+    <h2 class="section-title">Send Schedule by Email (Fallback)</h2>
+    <p class="page-text">If a caregiver cannot log in, use this to email their upcoming schedule directly.</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert--{% if message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" action="{% url 'send_schedule_email' %}" class="form-shell">
+        {% csrf_token %}
+        <label for="caregiver_id">Caregiver:</label>
+        <select name="caregiver_id" id="caregiver_id" required>
+            <option value="">-- Select a caregiver --</option>
+            {% for cg in caregivers %}
+                <option value="{{ cg.pk }}">{{ cg.first_name }} {{ cg.last_name }}{% if cg.user.email %} &lt;{{ cg.user.email }}&gt;{% endif %}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="button">Send Schedule</button>
+    </form>
 {% endblock %}
