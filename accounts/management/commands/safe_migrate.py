@@ -31,6 +31,12 @@ class Command(BaseCommand):
         # definitions, then fake every accounts migration so Django sees them as
         # applied and the consistency check passes.
         if not _table_exists('accounts_user'):
+            # auth_group and django_content_type must exist before we can create
+            # accounts_user (which has M2M relations to auth.Group / auth.Permission).
+            self.stdout.write('Running contenttypes + auth migrations first...')
+            call_command('migrate', 'contenttypes', verbosity=0)
+            call_command('migrate', 'auth', verbosity=0)
+
             self.stdout.write('Creating accounts tables from model definitions...')
             from accounts.models import User, Client, Caregiver, Visit
             with connection.schema_editor() as editor:
