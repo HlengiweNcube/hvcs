@@ -35,6 +35,10 @@
     </div>
     {% endif %}
 
+    {% if not alerts.missed_checkin and not alerts.never_started %}
+    <div class="alert alert--success">All visits are on track. No alerts.</div>
+    {% endif %}
+
     <h2 class="section-title">Overview</h2>
     <table class="data-table">
         <thead>

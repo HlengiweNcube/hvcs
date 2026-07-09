@@ -214,16 +214,18 @@ def admin_dashboard(request):
         'visits_cancelled': Visit.objects.filter(status=Visit.Status.CANCELLED).count(),
     }
 
-    # Compliance rate: completed / (completed + cancelled) over last 7 days
-    recent_done = Visit.objects.filter(
-        scheduled_date__gte=week_ago,
-        status__in=[Visit.Status.COMPLETED, Visit.Status.CANCELLED],
-    ).count()
+    # Compliance rate: completed / all non-cancelled past visits (last 7 days)
+    # Missed visits (still SCHEDULED, date in past) count against the rate.
     recent_completed = Visit.objects.filter(
         scheduled_date__gte=week_ago,
+        scheduled_date__lte=today,
         status=Visit.Status.COMPLETED,
     ).count()
-    compliance_rate = round((recent_completed / recent_done * 100) if recent_done else 0)
+    recent_denominator = Visit.objects.filter(
+        scheduled_date__gte=week_ago,
+        scheduled_date__lte=today,
+    ).exclude(status=Visit.Status.CANCELLED).count()
+    compliance_rate = round((recent_completed / recent_denominator * 100) if recent_denominator else 0)
 
     todays_visits = (
         Visit.objects.filter(scheduled_date=today)
