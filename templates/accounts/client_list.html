@@ -1,18 +1,23 @@
-{% extends "base.html" %}
-{% block title %}Clients{% endblock %}
+﻿{% extends "base.html" %}
+{% block title %}Clients — HVCS{% endblock %}
+{% block main_class %}page page--wide{% endblock %}
 {% block content %}
-    <h1 class="page-title">Clients</h1>
-    <div class="link-row">
-        <a class="button-link" href="/accounts/admin-dashboard/">Back to Admin Dashboard</a>
-        <a class="link-button" href="/accounts/clients/add/">Add Client</a>
-    </div>
 
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+    <div>
+        <h1 class="page-title">Clients</h1>
+        <p class="page-subtitle">Manage all registered clients in the system</p>
+    </div>
+    <a class="link-button" href="{% url 'client_create' %}">+ Add Client</a>
+</div>
+
+<div class="table-wrapper">
     <table class="data-table">
         <thead>
             <tr>
                 <th>Name</th>
                 <th>Address</th>
-                <th>Contact Phone</th>
+                <th>Phone</th>
                 <th>Care Needs</th>
                 <th>Active</th>
                 <th>Actions</th>
@@ -21,21 +26,27 @@
         <tbody>
             {% for client in clients %}
                 <tr>
-                    <td>{{ client.first_name }} {{ client.last_name }}</td>
+                    <td><strong>{{ client.first_name }} {{ client.last_name }}</strong></td>
                     <td>{{ client.address }}</td>
-                    <td>{{ client.contact_phone }}</td>
-                    <td>{{ client.care_needs }}</td>
-                    <td>{{ client.is_active }}</td>
+                    <td>{{ client.contact_phone|default:"—" }}</td>
+                    <td>{{ client.care_needs|default:"—"|truncatechars:50 }}</td>
                     <td>
-                        <a href="/accounts/clients/{{ client.id }}/edit/">Edit</a>
-                        <a href="/accounts/clients/{{ client.id }}/delete/">Delete</a>
+                        {% if client.is_active %}
+                            <span class="badge badge--green">Active</span>
+                        {% else %}
+                            <span class="badge badge--gray">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a class="action-link" href="{% url 'client_update' client.id %}">Edit</a>
+                        <a class="action-link action-link--danger" href="{% url 'client_delete' client.id %}">Delete</a>
                     </td>
                 </tr>
             {% empty %}
-                <tr>
-                    <td colspan="6" class="empty-row">No clients yet.</td>
-                </tr>
+                <tr><td colspan="6" class="empty-row">No clients yet. Add one above.</td></tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
+
 {% endblock %}

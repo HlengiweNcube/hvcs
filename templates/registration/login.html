@@ -1,15 +1,27 @@
 {% extends "base.html" %}
-{% block title %}HVCS Login{% endblock %}
-{% block main_class %}page page--narrow{% endblock %}
+{% block title %}Sign In — HVCS{% endblock %}
+{% block main_class %}auth-page{% endblock %}
 {% block content %}
-    <h1 class="page-title">HVCS Login</h1>
+<div class="auth-card">
+    <div class="auth-logo">
+        <div class="auth-logo-text">HVCS</div>
+        <div class="auth-logo-sub">Home Visit Care System</div>
+    </div>
+    <h1 class="auth-title">Welcome back</h1>
+    <p class="auth-sub">Sign in to access your dashboard</p>
+
     {% if form.errors %}
-        <p class="error-text">Invalid username or password.</p>
+        <div class="alert alert--danger">Invalid username or password. Please try again.</div>
     {% endif %}
+
     <form method="post" class="form-shell">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit" class="button">Sign in</button>
+        <button type="submit" class="button" style="width:100%;justify-content:center;margin-top:8px;">Sign In</button>
     </form>
-    <p class="page-text">Don't have an account? <a href="{% url 'register' %}">Register</a></p>
+
+    <div class="auth-footer">
+        Don't have an account? <a href="{% url 'register' %}">Register here</a>
+    </div>
+</div>
 {% endblock %}

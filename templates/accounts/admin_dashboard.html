@@ -1,62 +1,79 @@
-{% extends "base.html" %}
-{% block title %}Admin Dashboard{% endblock %}
+﻿{% extends "base.html" %}
+{% block title %}Admin Dashboard — HVCS{% endblock %}
+{% block main_class %}page page--wide{% endblock %}
 {% block content %}
-    <h1 class="page-title">Admin Dashboard</h1>
-    <p class="page-text">Welcome, {{ request.user.username }}.</p>
 
-    <div class="link-row">
-        <a class="link-button" href="/accounts/clients/">Clients</a>
-        <a class="link-button" href="/accounts/caregivers/">Caregivers</a>
-        <a class="link-button" href="/accounts/visits/">All Visits</a>
-        <a class="link-button" href="/accounts/managers/">Managers</a>
-        <a class="link-button" href="/accounts/compliance/">Compliance</a>
-        <form method="post" action="/accounts/logout/" style="display:inline">{% csrf_token %}<button type="submit" class="button-link">Logout</button></form>
+<div class="dash-welcome">
+    <div>
+        <h1>Admin Dashboard</h1>
+        <p>Welcome back, {{ request.user.get_full_name|default:request.user.username }}. Here's today's overview.</p>
     </div>
+    <span class="dash-welcome-badge">Administrator</span>
+</div>
 
-    {% if alerts.missed_checkin %}
-    <div class="alert alert--warning">
-        <strong>Missed Check-in ({{ alerts.missed_checkin|length }})</strong> — the following visits were scheduled today but the caregiver has not checked in:
-        <ul>
-            {% for v in alerts.missed_checkin %}
-                <li>{{ v.scheduled_time }} &mdash; {{ v.caregiver }} &rarr; {{ v.client }}</li>
-            {% endfor %}
-        </ul>
+{% if alerts.missed_checkin %}
+<div class="alert alert--warning">
+    <strong>⚠ Missed Check-in ({{ alerts.missed_checkin|length }})</strong> — scheduled today but caregiver has not checked in:
+    <ul>
+        {% for v in alerts.missed_checkin %}
+            <li>{{ v.scheduled_time }} &mdash; {{ v.caregiver }} &rarr; {{ v.client }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if alerts.never_started %}
+<div class="alert alert--danger">
+    <strong>🚨 Never Started ({{ alerts.never_started|length }})</strong> — past visits that were never checked in:
+    <ul>
+        {% for v in alerts.never_started %}
+            <li>{{ v.scheduled_date }} {{ v.scheduled_time }} &mdash; {{ v.caregiver }} &rarr; {{ v.client }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if not alerts.missed_checkin and not alerts.never_started %}
+<div class="alert alert--success">✅ All visits are on track. No alerts today.</div>
+{% endif %}
+
+<div class="stat-grid">
+    <div class="stat-card stat-card--blue">
+        <span class="stat-card__value">{{ stats.total_clients }}</span>
+        <span class="stat-card__label">Active Clients</span>
     </div>
-    {% endif %}
-
-    {% if alerts.never_started %}
-    <div class="alert alert--danger">
-        <strong>Never Started ({{ alerts.never_started|length }})</strong> — these past visits were never checked in and remain Scheduled:
-        <ul>
-            {% for v in alerts.never_started %}
-                <li>{{ v.scheduled_date }} {{ v.scheduled_time }} &mdash; {{ v.caregiver }} &rarr; {{ v.client }}</li>
-            {% endfor %}
-        </ul>
+    <div class="stat-card stat-card--sky">
+        <span class="stat-card__value">{{ stats.total_caregivers }}</span>
+        <span class="stat-card__label">Active Caregivers</span>
     </div>
-    {% endif %}
+    <div class="stat-card">
+        <span class="stat-card__value">{{ stats.total_managers }}</span>
+        <span class="stat-card__label">Managers</span>
+    </div>
+    <div class="stat-card stat-card--blue">
+        <span class="stat-card__value">{{ stats.visits_scheduled }}</span>
+        <span class="stat-card__label">Scheduled</span>
+    </div>
+    <div class="stat-card stat-card--amber">
+        <span class="stat-card__value">{{ stats.visits_in_progress }}</span>
+        <span class="stat-card__label">In Progress</span>
+    </div>
+    <div class="stat-card stat-card--green">
+        <span class="stat-card__value">{{ stats.visits_completed }}</span>
+        <span class="stat-card__label">Completed</span>
+    </div>
+    <div class="stat-card stat-card--red">
+        <span class="stat-card__value">{{ stats.visits_cancelled }}</span>
+        <span class="stat-card__label">Cancelled</span>
+    </div>
+    <div class="stat-card {% if compliance_rate >= 80 %}stat-card--green{% elif compliance_rate >= 60 %}stat-card--amber{% else %}stat-card--red{% endif %}">
+        <span class="stat-card__value">{{ compliance_rate }}%</span>
+        <span class="stat-card__label">Compliance (7d)</span>
+    </div>
+</div>
 
-    {% if not alerts.missed_checkin and not alerts.never_started %}
-    <div class="alert alert--success">All visits are on track. No alerts.</div>
-    {% endif %}
-
-    <h2 class="section-title">Overview</h2>
-    <table class="data-table">
-        <thead>
-            <tr><th>Metric</th><th>Count</th></tr>
-        </thead>
-        <tbody>
-            <tr><td>Active Clients</td><td>{{ stats.total_clients }}</td></tr>
-            <tr><td>Active Caregivers</td><td>{{ stats.total_caregivers }}</td></tr>
-            <tr><td>Managers</td><td>{{ stats.total_managers }}</td></tr>
-            <tr><td>Visits — Scheduled</td><td>{{ stats.visits_scheduled }}</td></tr>
-            <tr><td>Visits — In Progress</td><td>{{ stats.visits_in_progress }}</td></tr>
-            <tr><td>Visits — Completed</td><td>{{ stats.visits_completed }}</td></tr>
-            <tr><td>Visits — Cancelled</td><td>{{ stats.visits_cancelled }}</td></tr>
-            <tr><td><strong>Compliance Rate (last 7 days)</strong></td><td><strong>{{ compliance_rate }}%</strong></td></tr>
-        </tbody>
-    </table>
-
-    <h2 class="section-title">Today's Visits</h2>
+<h2 class="section-title">Today's Visits</h2>
+<div class="table-wrapper">
     <table class="data-table">
         <thead>
             <tr>
@@ -73,16 +90,23 @@
                     <td>{{ visit.scheduled_time }}</td>
                     <td>{{ visit.caregiver }}</td>
                     <td>{{ visit.client }}</td>
-                    <td>{{ visit.get_status_display }}</td>
-                    <td><a href="/accounts/visits/{{ visit.id }}/edit/">Edit</a></td>
+                    <td>
+                        {% if visit.status == 'SCHEDULED' %}<span class="status-pill status-pill--scheduled">Scheduled</span>
+                        {% elif visit.status == 'IN_PROGRESS' %}<span class="status-pill status-pill--inprogress">In Progress</span>
+                        {% elif visit.status == 'COMPLETED' %}<span class="status-pill status-pill--completed">Completed</span>
+                        {% else %}<span class="status-pill status-pill--cancelled">Cancelled</span>{% endif %}
+                    </td>
+                    <td><a class="action-link" href="{% url 'visit_update' visit.id %}">Edit</a></td>
                 </tr>
             {% empty %}
                 <tr><td colspan="5" class="empty-row">No visits scheduled for today.</td></tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
 
-    <h2 class="section-title">Last 7 Days</h2>
+<h2 class="section-title">Last 7 Days</h2>
+<div class="table-wrapper">
     <table class="data-table">
         <thead>
             <tr>
@@ -101,13 +125,19 @@
                     <td>{{ visit.scheduled_time }}</td>
                     <td>{{ visit.caregiver }}</td>
                     <td>{{ visit.client }}</td>
-                    <td>{{ visit.get_status_display }}</td>
-                    <td><a href="/accounts/visits/{{ visit.id }}/edit/">Edit</a></td>
+                    <td>
+                        {% if visit.status == 'SCHEDULED' %}<span class="status-pill status-pill--scheduled">Scheduled</span>
+                        {% elif visit.status == 'IN_PROGRESS' %}<span class="status-pill status-pill--inprogress">In Progress</span>
+                        {% elif visit.status == 'COMPLETED' %}<span class="status-pill status-pill--completed">Completed</span>
+                        {% else %}<span class="status-pill status-pill--cancelled">Cancelled</span>{% endif %}
+                    </td>
+                    <td><a class="action-link" href="{% url 'visit_update' visit.id %}">Edit</a></td>
                 </tr>
             {% empty %}
                 <tr><td colspan="6" class="empty-row">No visits in the last 7 days.</td></tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
 
 {% endblock %}

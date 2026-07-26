@@ -1,13 +1,23 @@
 {% extends "base.html" %}
-{% block title %}HVCS Register{% endblock %}
-{% block main_class %}page page--narrow{% endblock %}
+{% block title %}Register — HVCS{% endblock %}
+{% block main_class %}auth-page{% endblock %}
 {% block content %}
-    <h1 class="page-title">Create an Account</h1>
-    <p class="page-text">Register as a Caregiver to access the system.</p>
+<div class="auth-card" style="max-width:520px;">
+    <div class="auth-logo">
+        <div class="auth-logo-text">HVCS</div>
+        <div class="auth-logo-sub">Home Visit Care System</div>
+    </div>
+    <h1 class="auth-title">Create your account</h1>
+    <p class="auth-sub">Register as a Caregiver to access the system</p>
+
     <form method="post" class="form-shell">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit" class="button">Register</button>
+        <button type="submit" class="button" style="width:100%;justify-content:center;margin-top:8px;">Create Account</button>
     </form>
-    <p class="page-text">Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
+
+    <div class="auth-footer">
+        Already have an account? <a href="{% url 'login' %}">Sign in</a>
+    </div>
+</div>
 {% endblock %}

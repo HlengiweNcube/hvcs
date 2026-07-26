@@ -1,69 +1,99 @@
 {% extends "base.html" %}
-{% block title %}Visit Detail{% endblock %}
+{% block title %}Visit Detail — HVCS{% endblock %}
+{% block main_class %}page{% endblock %}
 {% block content %}
-    <h1 class="page-title">Visit Detail</h1>
-    <div class="link-row">
-        <a class="button-link" href="{% url 'caregiver_my_visits' %}">Back to My Visits</a>
+
+<div style="display:flex;align-items:center;gap:16px;margin-bottom:6px;">
+    <h1 class="page-title" style="margin:0;">Visit Detail</h1>
+    {% if visit.status == 'SCHEDULED' %}<span class="status-pill status-pill--scheduled">Scheduled</span>
+    {% elif visit.status == 'IN_PROGRESS' %}<span class="status-pill status-pill--inprogress">In Progress</span>
+    {% elif visit.status == 'COMPLETED' %}<span class="status-pill status-pill--completed">Completed</span>
+    {% else %}<span class="status-pill status-pill--cancelled">Cancelled</span>{% endif %}
+</div>
+<p class="page-subtitle">{{ visit.scheduled_date }} at {{ visit.scheduled_time }} &mdash; {{ visit.client }}</p>
+
+<div class="visit-detail-grid">
+    <div class="visit-field">
+        <div class="visit-field__key">Client</div>
+        <div class="visit-field__val">{{ visit.client }}</div>
     </div>
-
-    <table class="data-table">
-        <tbody>
-            <tr><th>Client</th><td>{{ visit.client }}</td></tr>
-            <tr><th>Date</th><td>{{ visit.scheduled_date }}</td></tr>
-            <tr><th>Time</th><td>{{ visit.scheduled_time }}</td></tr>
-            <tr><th>Status</th><td>{{ visit.get_status_display }}</td></tr>
-            {% if visit.check_in_time %}
-                <tr><th>Checked In</th><td>{{ visit.check_in_time }}</td></tr>
-                {% if visit.check_in_lat %}
-                    <tr><th>GPS</th><td>{{ visit.check_in_lat }}, {{ visit.check_in_lng }}</td></tr>
-                {% endif %}
-            {% endif %}
-            {% if visit.check_out_time %}
-                <tr><th>Checked Out</th><td>{{ visit.check_out_time }}</td></tr>
-            {% endif %}
-        </tbody>
-    </table>
-
-    {% if visit.status == 'SCHEDULED' %}
-        <h2 class="section-title">Check In</h2>
-        <form id="checkin-form" method="post" action="{% url 'caregiver_checkin' visit.pk %}">
-            {% csrf_token %}
-            <input type="hidden" name="lat" id="checkin-lat">
-            <input type="hidden" name="lng" id="checkin-lng">
-            <button type="button" class="button" onclick="doCheckin()">Check In (with GPS)</button>
-            <button type="submit" class="button" style="margin-left:8px">Check In (no GPS)</button>
-        </form>
-    {% elif visit.status == 'IN_PROGRESS' %}
-        <h2 class="section-title">Check Out</h2>
-        <form method="post" action="{% url 'caregiver_checkout' visit.pk %}">
-            {% csrf_token %}
-            <button type="submit" class="button">Check Out</button>
-        </form>
+    <div class="visit-field">
+        <div class="visit-field__key">Date</div>
+        <div class="visit-field__val">{{ visit.scheduled_date }}</div>
+    </div>
+    <div class="visit-field">
+        <div class="visit-field__key">Scheduled Time</div>
+        <div class="visit-field__val">{{ visit.scheduled_time }}</div>
+    </div>
+    <div class="visit-field">
+        <div class="visit-field__key">Status</div>
+        <div class="visit-field__val">{{ visit.get_status_display }}</div>
+    </div>
+    {% if visit.check_in_time %}
+    <div class="visit-field">
+        <div class="visit-field__key">Checked In</div>
+        <div class="visit-field__val">{{ visit.check_in_time|date:"N j, Y, g:i a" }}</div>
+    </div>
+    {% if visit.check_in_lat %}
+    <div class="visit-field">
+        <div class="visit-field__key">GPS Location</div>
+        <div class="visit-field__val">{{ visit.check_in_lat }}, {{ visit.check_in_lng }}</div>
+    </div>
     {% endif %}
+    {% endif %}
+    {% if visit.check_out_time %}
+    <div class="visit-field">
+        <div class="visit-field__key">Checked Out</div>
+        <div class="visit-field__val">{{ visit.check_out_time|date:"N j, Y, g:i a" }}</div>
+    </div>
+    {% endif %}
+</div>
 
-    <h2 class="section-title">Notes</h2>
-    <form method="post" class="form-shell">
+{% if visit.status == 'SCHEDULED' %}
+<div class="checkin-box">
+    <h3>Check In to this Visit</h3>
+    <form id="checkin-form" method="post" action="{% url 'caregiver_checkin' visit.pk %}">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="button">Save Notes</button>
+        <input type="hidden" name="lat" id="checkin-lat">
+        <input type="hidden" name="lng" id="checkin-lng">
+        <div class="action-row">
+            <button type="button" class="button button--success" onclick="doCheckin()">📍 Check In with GPS</button>
+            <button type="submit" class="button-link">Check In (no GPS)</button>
+        </div>
     </form>
+</div>
+{% elif visit.status == 'IN_PROGRESS' %}
+<div class="checkin-box" style="border-color:#d1fae5;">
+    <h3>Complete this Visit</h3>
+    <form method="post" action="{% url 'caregiver_checkout' visit.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="button button--success">✅ Check Out</button>
+    </form>
+</div>
+{% endif %}
 
-    <script>
-        function doCheckin() {
-            if (!navigator.geolocation) {
-                document.getElementById('checkin-form').submit();
-                return;
-            }
-            navigator.geolocation.getCurrentPosition(
-                function(pos) {
-                    document.getElementById('checkin-lat').value = pos.coords.latitude.toFixed(6);
-                    document.getElementById('checkin-lng').value = pos.coords.longitude.toFixed(6);
-                    document.getElementById('checkin-form').submit();
-                },
-                function() {
-                    document.getElementById('checkin-form').submit();
-                }
-            );
+<h2 class="section-title">Visit Notes</h2>
+<form method="post" class="form-shell">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="button">Save Notes</button>
+</form>
+
+<script>
+    function doCheckin() {
+        if (!navigator.geolocation) {
+            document.getElementById('checkin-form').submit();
+            return;
         }
-    </script>
+        navigator.geolocation.getCurrentPosition(
+            function(pos) {
+                document.getElementById('checkin-lat').value = pos.coords.latitude.toFixed(6);
+                document.getElementById('checkin-lng').value = pos.coords.longitude.toFixed(6);
+                document.getElementById('checkin-form').submit();
+            },
+            function() { document.getElementById('checkin-form').submit(); }
+        );
+    }
+</script>
+
 {% endblock %}

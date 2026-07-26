@@ -1,27 +1,38 @@
 {% extends "base.html" %}
-{% block title %}Visits{% endblock %}
+{% block title %}Visits — HVCS{% endblock %}
+{% block main_class %}page page--wide{% endblock %}
 {% block content %}
-    <h1 class="page-title">Visits</h1>
-    <div class="link-row">
-        <a class="button-link" href="/accounts/admin-dashboard/">Back to Admin Dashboard</a>
-        <a class="link-button" href="/accounts/visits/add/">Schedule Visit</a>
-    </div>
 
-    <form method="get" class="form-shell">
-        <label>From: <input type="date" name="date_from" value="{{ date_from }}"></label>
-        <label>To: <input type="date" name="date_to" value="{{ date_to }}"></label>
-        <label>Status:
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+    <div>
+        <h1 class="page-title">All Visits</h1>
+        <p class="page-subtitle">Schedule, track, and manage all home care visits</p>
+    </div>
+    <a class="link-button" href="{% url 'visit_create' %}">+ Schedule Visit</a>
+</div>
+
+<div class="filter-bar">
+    <form method="get" style="display:contents;">
+        <label>From
+            <input type="date" name="date_from" value="{{ date_from }}">
+        </label>
+        <label>To
+            <input type="date" name="date_to" value="{{ date_to }}">
+        </label>
+        <label>Status
             <select name="status">
-                <option value="">All</option>
+                <option value="">All Statuses</option>
                 {% for value, label in status_choices %}
                     <option value="{{ value }}" {% if value == status_filter %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
             </select>
         </label>
-        <button type="submit" class="button">Filter</button>
-        <a class="button-link" href="/accounts/visits/">Clear</a>
+        <button type="submit" class="button button--sm">Filter</button>
+        <a class="button-link button--sm" href="{% url 'visit_list' %}">Clear</a>
     </form>
+</div>
 
+<div class="table-wrapper">
     <table class="data-table">
         <thead>
             <tr>
@@ -41,18 +52,23 @@
                     <td>{{ visit.scheduled_time }}</td>
                     <td>{{ visit.caregiver }}</td>
                     <td>{{ visit.client }}</td>
-                    <td>{{ visit.get_status_display }}</td>
-                    <td>{{ visit.notes|default:"—" }}</td>
                     <td>
-                        <a href="/accounts/visits/{{ visit.id }}/edit/">Edit</a>
-                        <a href="/accounts/visits/{{ visit.id }}/delete/">Delete</a>
+                        {% if visit.status == 'SCHEDULED' %}<span class="status-pill status-pill--scheduled">Scheduled</span>
+                        {% elif visit.status == 'IN_PROGRESS' %}<span class="status-pill status-pill--inprogress">In Progress</span>
+                        {% elif visit.status == 'COMPLETED' %}<span class="status-pill status-pill--completed">Completed</span>
+                        {% else %}<span class="status-pill status-pill--cancelled">Cancelled</span>{% endif %}
+                    </td>
+                    <td>{{ visit.notes|default:"—"|truncatechars:40 }}</td>
+                    <td>
+                        <a class="action-link" href="{% url 'visit_update' visit.id %}">Edit</a>
+                        <a class="action-link action-link--danger" href="{% url 'visit_delete' visit.id %}">Delete</a>
                     </td>
                 </tr>
             {% empty %}
-                <tr>
-                    <td colspan="7" class="empty-row">No visits found.</td>
-                </tr>
+                <tr><td colspan="7" class="empty-row">No visits found matching your filters.</td></tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
+
 {% endblock %}

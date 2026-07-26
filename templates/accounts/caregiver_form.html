@@ -1,15 +1,16 @@
-{% extends "base.html" %}
-{% block title %}{{ title }}{% endblock %}
+﻿{% extends "base.html" %}
+{% block title %}{{ title }} — HVCS{% endblock %}
 {% block main_class %}page page--narrow{% endblock %}
 {% block content %}
-    <h1 class="page-title">{{ title }}</h1>
-    <div class="link-row">
-        <a class="button-link" href="/accounts/caregivers/">Back to Caregivers</a>
-    </div>
+<h1 class="page-title">{{ title }}</h1>
+<p class="page-subtitle">Fill in the details below and click Save.</p>
 
-    <form method="post" class="form-shell">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="button">Save</button>
-    </form>
+<form method="post" class="form-shell">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="action-row" style="margin-top:8px;">
+        <button type="submit" class="button">Save Caregiver</button>
+        <a class="button-link" href="{% url 'caregiver_list' %}">Cancel</a>
+    </div>
+</form>
 {% endblock %}

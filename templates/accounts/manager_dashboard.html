@@ -1,37 +1,44 @@
-{% extends "base.html" %}
-{% block title %}Manager Dashboard{% endblock %}
-{% block main_class %}page page--narrow{% endblock %}
+﻿{% extends "base.html" %}
+{% block title %}Manager Dashboard — HVCS{% endblock %}
+{% block main_class %}page page--wide{% endblock %}
 {% block content %}
-    <h1 class="page-title">Manager Dashboard</h1>
-    <p class="page-text">Welcome, {{ request.user.username }}.</p>
 
-    {% if alerts.missed_checkin %}
-    <div class="alert alert--warning">
-        <strong>Missed Check-in ({{ alerts.missed_checkin|length }})</strong> — scheduled today but not yet checked in:
-        <ul>
-            {% for v in alerts.missed_checkin %}
-                <li>{{ v.scheduled_time }} &mdash; {{ v.caregiver }} &rarr; {{ v.client }}</li>
-            {% endfor %}
-        </ul>
+<div class="dash-welcome">
+    <div>
+        <h1>Manager Dashboard</h1>
+        <p>Welcome back, {{ request.user.get_full_name|default:request.user.username }}. Monitor today's care operations.</p>
     </div>
-    {% endif %}
+    <span class="dash-welcome-badge">Manager</span>
+</div>
 
-    {% if alerts.never_started %}
-    <div class="alert alert--danger">
-        <strong>Never Started ({{ alerts.never_started|length }})</strong> — past visits that were never checked in:
-        <ul>
-            {% for v in alerts.never_started %}
-                <li>{{ v.scheduled_date }} {{ v.scheduled_time }} &mdash; {{ v.caregiver }} &rarr; {{ v.client }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-    {% endif %}
+{% if alerts.missed_checkin %}
+<div class="alert alert--warning">
+    <strong>⚠ Missed Check-in ({{ alerts.missed_checkin|length }})</strong> — scheduled today but not yet checked in:
+    <ul>
+        {% for v in alerts.missed_checkin %}
+            <li>{{ v.scheduled_time }} &mdash; {{ v.caregiver }} &rarr; {{ v.client }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
 
-    {% if not alerts.missed_checkin and not alerts.never_started %}
-    <div class="alert alert--success">All visits are on track. No alerts.</div>
-    {% endif %}
+{% if alerts.never_started %}
+<div class="alert alert--danger">
+    <strong>🚨 Never Started ({{ alerts.never_started|length }})</strong> — past visits that were never checked in:
+    <ul>
+        {% for v in alerts.never_started %}
+            <li>{{ v.scheduled_date }} {{ v.scheduled_time }} &mdash; {{ v.caregiver }} &rarr; {{ v.client }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
 
-    <h2 class="section-title">Today's Visits</h2>
+{% if not alerts.missed_checkin and not alerts.never_started %}
+<div class="alert alert--success">✅ All visits are on track. No alerts today.</div>
+{% endif %}
+
+<h2 class="section-title">Today's Visits</h2>
+<div class="table-wrapper">
     <table class="data-table">
         <thead>
             <tr>
@@ -44,39 +51,35 @@
                     <td>{{ visit.scheduled_time }}</td>
                     <td>{{ visit.caregiver }}</td>
                     <td>{{ visit.client }}</td>
-                    <td>{{ visit.get_status_display }}</td>
+                    <td>
+                        {% if visit.status == 'SCHEDULED' %}<span class="status-pill status-pill--scheduled">Scheduled</span>
+                        {% elif visit.status == 'IN_PROGRESS' %}<span class="status-pill status-pill--inprogress">In Progress</span>
+                        {% elif visit.status == 'COMPLETED' %}<span class="status-pill status-pill--completed">Completed</span>
+                        {% else %}<span class="status-pill status-pill--cancelled">Cancelled</span>{% endif %}
+                    </td>
                 </tr>
             {% empty %}
                 <tr><td colspan="4" class="empty-row">No visits scheduled for today.</td></tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
 
-    <div class="link-row">
-        <a class="link-button" href="/accounts/compliance/">Compliance Dashboard</a>
-        <form method="post" action="/accounts/logout/" style="display:inline">{% csrf_token %}<button type="submit" class="button-link">Logout</button></form>
-    </div>
+<h2 class="section-title">Send Schedule by Email</h2>
+<p class="page-text" style="color:var(--gray-500);margin-bottom:16px;">Email a caregiver their upcoming schedule directly — useful if they cannot log in.</p>
 
-    <h2 class="section-title">Send Schedule by Email (Fallback)</h2>
-    <p class="page-text">If a caregiver cannot log in, use this to email their upcoming schedule directly.</p>
-
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert--{% if message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
-
-    <form method="post" action="{% url 'send_schedule_email' %}" class="form-shell">
-        {% csrf_token %}
-        <label for="caregiver_id">Caregiver:</label>
+<form method="post" action="{% url 'send_schedule_email' %}" class="form-shell" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+    {% csrf_token %}
+    <div style="flex:1;min-width:200px;">
+        <label for="caregiver_id">Caregiver</label>
         <select name="caregiver_id" id="caregiver_id" required>
             <option value="">-- Select a caregiver --</option>
             {% for cg in caregivers %}
                 <option value="{{ cg.pk }}">{{ cg.first_name }} {{ cg.last_name }}{% if cg.user.email %} &lt;{{ cg.user.email }}&gt;{% endif %}</option>
             {% endfor %}
         </select>
-        <button type="submit" class="button">Send Schedule</button>
-    </form>
+    </div>
+    <button type="submit" class="button">Send Schedule</button>
+</form>
+
 {% endblock %}

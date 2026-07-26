@@ -1,35 +1,138 @@
 {% extends "base.html" %}
-{% block title %}HVCS Home{% endblock %}
+{% block title %}HVCS — Home Visit Care System{% endblock %}
+{% block main_class %}landing-page{% endblock %}
+
 {% block content %}
-    <h1 class="page-title">HVCS</h1>
-    <p class="page-text">Home Care Visitation and Compliance System</p>
-    {% if user.is_authenticated %}
-        <p class="page-text">Welcome, {{ user.username }}.</p>
-        {% if user.role == 'ADMIN' %}
-            <p class="page-text">You are logged in as <strong>Administrator</strong>.</p>
-            <div class="link-row">
-                <a class="link-button" href="/accounts/admin-dashboard/">Go to Admin Dashboard</a>
-                <a class="link-button" href="/accounts/clients/">Manage Clients</a>
-                <a class="link-button" href="/accounts/caregivers/">Manage Caregivers</a>
-            </div>
-        {% elif user.role == 'MANAGER' %}
-            <p class="page-text">You are logged in as <strong>Manager</strong>.</p>
-            <div class="link-row">
-                <a class="link-button" href="/accounts/manager-dashboard/">Go to Manager Dashboard</a>
-            </div>
-        {% else %}
-            <p class="page-text">You are logged in as <strong>Caregiver</strong>.</p>
-            <div class="link-row">
-                <a class="link-button" href="/accounts/caregiver-dashboard/">Go to Caregiver Dashboard</a>
-            </div>
-        {% endif %}
-        <div class="link-row">
-            <form method="post" action="/accounts/logout/" style="display:inline">{% csrf_token %}<button type="submit" class="button-link">Logout</button></form>
+
+{% if user.is_authenticated %}
+    {# Authenticated: redirect banner #}
+    <section style="max-width:640px;margin:60px auto;text-align:center;padding:0 24px;">
+        <div style="font-size:3rem;margin-bottom:16px;">👋</div>
+        <h1 style="font-size:1.8rem;font-weight:800;color:var(--gray-900);margin:0 0 10px;">Welcome back, {{ user.first_name|default:user.username }}.</h1>
+        <p style="color:var(--gray-500);margin:0 0 28px;">You're logged in as <strong>{{ user.get_role_display }}</strong>. Head to your dashboard to get started.</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+            {% if user.role == 'ADMIN' %}
+                <a class="link-button" href="{% url 'admin_dashboard' %}">Go to Admin Dashboard</a>
+            {% elif user.role == 'MANAGER' %}
+                <a class="link-button" href="{% url 'manager_dashboard' %}">Go to Manager Dashboard</a>
+            {% else %}
+                <a class="link-button" href="{% url 'caregiver_dashboard' %}">Go to My Dashboard</a>
+            {% endif %}
         </div>
-    {% else %}
-        <p class="page-text">Please log in to access the system.</p>
-        <div class="link-row">
-            <a class="link-button" href="/accounts/login/">Sign In</a>
+    </section>
+
+{% else %}
+    {# Landing nav #}
+    <nav class="landing-nav">
+        <a class="landing-nav-brand" href="#">HVCS</a>
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a class="nav-signin" href="{% url 'login' %}">Sign In</a>
+    </nav>
+
+    {# Hero #}
+    <section class="hero">
+        <div class="hero-inner">
+            <span class="hero-tag">Home Visit Care System</span>
+            <h1>Care Delivered.<br>Compliance Assured.</h1>
+            <p>HVCS helps home-care agencies schedule visits, track real-time check-ins with GPS, and stay compliant — all in one secure platform built for caregivers and managers.</p>
+            <div class="hero-cta">
+                <a class="hero-btn hero-btn--primary" href="{% url 'register' %}">Get Started — Register</a>
+                <a class="hero-btn hero-btn--outline" href="{% url 'login' %}">Sign In</a>
+            </div>
         </div>
-    {% endif %}
+    </section>
+
+    {# Features #}
+    <section class="features" id="features">
+        <h2 class="features-title">Everything your care team needs</h2>
+        <p class="features-sub">One platform for scheduling, tracking, and compliance reporting.</p>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon feature-icon--blue">📅</div>
+                <h3>Smart Scheduling</h3>
+                <p>Schedule visits with a single click. Assign caregivers, set times, and manage your entire roster from one place.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon feature-icon--green">📍</div>
+                <h3>GPS Check-In &amp; Check-Out</h3>
+                <p>Caregivers check in on arrival and check out on departure. GPS coordinates are recorded for accountability.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon feature-icon--amber">📊</div>
+                <h3>Compliance Dashboard</h3>
+                <p>Real-time compliance rates per caregiver. Spot missed visits, late check-ins, and incomplete notes instantly.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon feature-icon--sky">🔔</div>
+                <h3>Live Alerts</h3>
+                <p>Managers and admins receive automatic alerts for missed check-ins and overdue visits — so nothing slips through.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon feature-icon--blue">👥</div>
+                <h3>Role-Based Access</h3>
+                <p>Admins, managers, and caregivers each see exactly what they need. Secure role-based dashboards out of the box.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon feature-icon--green">📧</div>
+                <h3>Schedule Emails</h3>
+                <p>Managers can email a caregiver their upcoming schedule with one click — a handy fallback when caregivers can't log in.</p>
+            </div>
+        </div>
+    </section>
+
+    {# How it works #}
+    <section class="how-it-works" id="how-it-works">
+        <div class="how-it-works-inner">
+            <h2 class="features-title">How It Works</h2>
+            <p class="features-sub">From onboarding to compliance in four simple steps.</p>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div class="step-body">
+                        <h4>Register or Sign In</h4>
+                        <p>Caregivers self-register. Admins create manager accounts and manage the full team.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div class="step-body">
+                        <h4>Schedule Visits</h4>
+                        <p>Admins assign caregivers to clients, setting dates, times, and any special care notes.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div class="step-body">
+                        <h4>Caregivers Check In</h4>
+                        <p>At the client's home, caregivers check in via the dashboard — optionally with GPS location.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <div class="step-body">
+                        <h4>Review Compliance</h4>
+                        <p>Managers and admins review real-time compliance reports and act on any alerts.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# CTA footer #}
+    <section class="landing-cta">
+        <h2>Ready to streamline your care operations?</h2>
+        <p>Join HVCS today and bring visibility, accountability, and compliance to your home-care team.</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+            <a class="link-button" href="{% url 'register' %}">Create Free Account</a>
+            <a class="button-link" href="{% url 'login' %}">Sign In</a>
+        </div>
+    </section>
+
+    <footer style="text-align:center;padding:24px;font-size:0.82rem;color:var(--gray-400);border-top:1px solid var(--gray-200);">
+        &copy; 2026 HVCS — Home Visit Care System. All rights reserved.
+    </footer>
+{% endif %}
+
 {% endblock %}

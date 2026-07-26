@@ -1,15 +1,16 @@
-{% extends "base.html" %}
-{% block title %}Delete Client{% endblock %}
+﻿{% extends "base.html" %}
+{% block title %}Delete Client — HVCS{% endblock %}
 {% block main_class %}page page--narrow{% endblock %}
 {% block content %}
-    <h1 class="page-title">Delete Client</h1>
-    <p class="page-text">Are you sure you want to delete {{ client.first_name }} {{ client.last_name }}?</p>
-
-    <form method="post" class="form-shell">
-        {% csrf_token %}
-        <div class="action-row">
-            <button type="submit" class="button button--danger">Confirm Delete</button>
-            <a class="button-link" href="/accounts/clients/">Cancel</a>
-        </div>
-    </form>
+<h1 class="page-title">Delete Client</h1>
+<div class="alert alert--danger">
+    Are you sure you want to permanently delete <strong>{{ client.first_name }} {{ client.last_name }}</strong>? This action cannot be undone.
+</div>
+<form method="post" class="form-shell">
+    {% csrf_token %}
+    <div class="action-row">
+        <button type="submit" class="button button--danger">Yes, Delete</button>
+        <a class="button-link" href="{% url 'client_list' %}">Cancel</a>
+    </div>
+</form>
 {% endblock %}

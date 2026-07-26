@@ -1,42 +1,57 @@
 {% extends "base.html" %}
-{% block title %}Compliance Dashboard{% endblock %}
+{% block title %}Compliance Dashboard — HVCS{% endblock %}
+{% block main_class %}page page--wide{% endblock %}
 {% block content %}
-    <h1 class="page-title">Compliance Dashboard</h1>
 
-    {# --- Overall summary cards --- #}
-    <div class="compliance-cards">
-        <div class="compliance-card">
-            <span class="compliance-card__value">{{ summary.assigned }}</span>
-            <span class="compliance-card__label">Total Assigned</span>
-        </div>
-        <div class="compliance-card compliance-card--green">
-            <span class="compliance-card__value">{{ summary.completed }}</span>
-            <span class="compliance-card__label">Completed</span>
-        </div>
-        <div class="compliance-card compliance-card--red">
-            <span class="compliance-card__value">{{ summary.missed }}</span>
-            <span class="compliance-card__label">Missed</span>
-        </div>
-        <div class="compliance-card compliance-card--grey">
-            <span class="compliance-card__value">{{ summary.cancelled }}</span>
-            <span class="compliance-card__label">Cancelled</span>
-        </div>
-        <div class="compliance-card {% if summary.overall_rate is None %}compliance-card--grey{% elif summary.overall_rate >= 80 %}compliance-card--green{% elif summary.overall_rate >= 60 %}compliance-card--amber{% else %}compliance-card--red{% endif %}">
-            <span class="compliance-card__value">{% if summary.overall_rate is None %}N/A{% else %}{{ summary.overall_rate }}%{% endif %}</span>
-            <span class="compliance-card__label">Overall Rate</span>
-        </div>
+<div class="dash-welcome">
+    <div>
+        <h1>Compliance Dashboard</h1>
+        <p>Showing data from {{ date_from }} to {{ date_to }}</p>
     </div>
+    <span class="dash-welcome-badge">Compliance</span>
+</div>
 
-    {# --- Date range filter --- #}
-    <form method="get" class="form-shell" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:24px;">
-        <label>From: <input type="date" name="date_from" value="{{ date_from }}"></label>
-        <label>To: <input type="date" name="date_to" value="{{ date_to }}"></label>
-        <button type="submit" class="button">Apply</button>
-        <a class="button-link" href="/accounts/compliance/">Reset</a>
+{# Overall summary cards #}
+<div class="compliance-cards">
+    <div class="compliance-card">
+        <span class="compliance-card__value">{{ summary.assigned }}</span>
+        <span class="compliance-card__label">Total Assigned</span>
+    </div>
+    <div class="compliance-card compliance-card--green">
+        <span class="compliance-card__value">{{ summary.completed }}</span>
+        <span class="compliance-card__label">Completed</span>
+    </div>
+    <div class="compliance-card compliance-card--red">
+        <span class="compliance-card__value">{{ summary.missed }}</span>
+        <span class="compliance-card__label">Missed</span>
+    </div>
+    <div class="compliance-card compliance-card--grey">
+        <span class="compliance-card__value">{{ summary.cancelled }}</span>
+        <span class="compliance-card__label">Cancelled</span>
+    </div>
+    <div class="compliance-card {% if summary.overall_rate is None %}compliance-card--grey{% elif summary.overall_rate >= 80 %}compliance-card--green{% elif summary.overall_rate >= 60 %}compliance-card--amber{% else %}compliance-card--red{% endif %}">
+        <span class="compliance-card__value">{% if summary.overall_rate is None %}N/A{% else %}{{ summary.overall_rate }}%{% endif %}</span>
+        <span class="compliance-card__label">Overall Rate</span>
+    </div>
+</div>
+
+{# Date range filter #}
+<div class="filter-bar" style="margin-bottom:28px;">
+    <form method="get" style="display:contents;">
+        <label>From
+            <input type="date" name="date_from" value="{{ date_from }}">
+        </label>
+        <label>To
+            <input type="date" name="date_to" value="{{ date_to }}">
+        </label>
+        <button type="submit" class="button button--sm">Apply Filter</button>
+        <a class="button-link button--sm" href="{% url 'compliance_dashboard' %}">Reset</a>
     </form>
+</div>
 
-    {# --- Per-caregiver table --- #}
-    <h2 class="section-title">Per-Caregiver Breakdown</h2>
+{# Per-caregiver breakdown #}
+<h2 class="section-title">Per-Caregiver Breakdown</h2>
+<div class="table-wrapper">
     <table class="data-table">
         <thead>
             <tr>
@@ -54,31 +69,25 @@
         <tbody>
             {% for row in caregiver_stats %}
             <tr>
-                <td>{{ row.caregiver }}</td>
+                <td><strong>{{ row.caregiver }}</strong></td>
                 <td>{{ row.assigned }}</td>
                 <td>{{ row.completed }}</td>
                 <td>
                     {% if row.missed %}
                         <span class="badge badge--red">{{ row.missed }}</span>
-                    {% else %}
-                        0
-                    {% endif %}
+                    {% else %}0{% endif %}
                 </td>
                 <td>{{ row.cancelled }}</td>
                 <td>{{ row.in_progress }}</td>
                 <td>
                     {% if row.late %}
                         <span class="badge badge--amber">{{ row.late }}</span>
-                    {% else %}
-                        0
-                    {% endif %}
+                    {% else %}0{% endif %}
                 </td>
                 <td>
                     {% if row.no_notes %}
                         <span class="badge badge--amber">{{ row.no_notes }}</span>
-                    {% else %}
-                        0
-                    {% endif %}
+                    {% else %}0{% endif %}
                 </td>
                 <td>
                     {% if row.rate is None %}
@@ -95,12 +104,6 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
 
-    <div class="link-row" style="margin-top:24px;">
-        {% if request.user.role == 'ADMIN' %}
-            <a class="button-link" href="/accounts/admin-dashboard/">Back to Admin Dashboard</a>
-        {% else %}
-            <a class="button-link" href="/accounts/manager-dashboard/">Back to Manager Dashboard</a>
-        {% endif %}
-    </div>
 {% endblock %}

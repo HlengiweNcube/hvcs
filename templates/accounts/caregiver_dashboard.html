@@ -1,17 +1,65 @@
-{% extends "base.html" %}
-{% block title %}Caregiver Dashboard{% endblock %}
-{% block main_class %}page page--narrow{% endblock %}
+﻿{% extends "base.html" %}
+{% block title %}My Dashboard — HVCS{% endblock %}
+{% block main_class %}page{% endblock %}
 {% block content %}
-    <h1 class="page-title">Caregiver Dashboard</h1>
-    <p class="page-text">Welcome, {{ caregiver.first_name }} {{ caregiver.last_name }}.</p>
 
-    <div class="link-row">
-        <a class="link-button" href="/accounts/caregiver-dashboard/profile/">My Profile</a>
-        <a class="link-button" href="/accounts/caregiver-dashboard/visits/">My Visits</a>
-        <a class="link-button" href="/accounts/caregiver-dashboard/clients/">My Clients</a>
+<div class="dash-welcome">
+    <div>
+        <h1>Welcome, {{ caregiver.first_name }}!</h1>
+        <p>Here is your care hub — manage your visits, clients, and profile.</p>
     </div>
+    <span class="dash-welcome-badge">Caregiver</span>
+</div>
 
-    <div class="link-row">
-        <form method="post" action="/accounts/logout/" style="display:inline">{% csrf_token %}<button type="submit" class="button-link">Logout</button></form>
-    </div>
+<div class="nav-card-grid">
+    <a class="nav-card" href="{% url 'caregiver_my_visits' %}">
+        <span class="nav-card__icon">📅</span>
+        My Visits
+        <span class="nav-card__sub">View and manage your scheduled visits</span>
+    </a>
+    <a class="nav-card" href="{% url 'caregiver_my_clients' %}">
+        <span class="nav-card__icon">👥</span>
+        My Clients
+        <span class="nav-card__sub">See your assigned clients</span>
+    </a>
+    <a class="nav-card" href="{% url 'caregiver_my_profile' %}">
+        <span class="nav-card__icon">👤</span>
+        My Profile
+        <span class="nav-card__sub">View your account information</span>
+    </a>
+</div>
+
+<h2 class="section-title">Upcoming Visits</h2>
+<div class="table-wrapper">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Client</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for visit in visits %}
+                <tr>
+                    <td>{{ visit.scheduled_date }}</td>
+                    <td>{{ visit.scheduled_time }}</td>
+                    <td>{{ visit.client }}</td>
+                    <td>
+                        {% if visit.status == 'SCHEDULED' %}<span class="status-pill status-pill--scheduled">Scheduled</span>
+                        {% elif visit.status == 'IN_PROGRESS' %}<span class="status-pill status-pill--inprogress">In Progress</span>
+                        {% elif visit.status == 'COMPLETED' %}<span class="status-pill status-pill--completed">Completed</span>
+                        {% else %}<span class="status-pill status-pill--cancelled">Cancelled</span>{% endif %}
+                    </td>
+                    <td><a class="action-link" href="{% url 'caregiver_visit_detail' visit.pk %}">View</a></td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5" class="empty-row">No visits scheduled.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
 {% endblock %}

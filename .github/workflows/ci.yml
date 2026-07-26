@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: hvcs_test
+          POSTGRES_USER: hvcs
+          POSTGRES_PASSWORD: hvcs
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      SECRET_KEY: ci-insecure-key-for-testing-only
+      DEBUG: "True"
+      DATABASE_URL: postgres://hvcs:hvcs@localhost:5432/hvcs_test
+      ALLOWED_HOSTS: localhost,127.0.0.1
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Django system check
+        run: python manage.py check
+
+      - name: Run migrations
+        run: python manage.py migrate --run-syncdb
+
+      - name: Run tests
+        run: python manage.py test --verbosity=2
+
+      - name: Collect static files
+        run: python manage.py collectstatic --noinput

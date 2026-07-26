@@ -1,0 +1,32 @@
+databases:
+  - name: hvcs-db
+    databaseName: hvcs
+    user: hvcs
+    plan: free
+
+services:
+  - type: web
+    name: hvcs-web
+    plan: free
+    runtime: python
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+      python manage.py migrate --run-syncdb
+    startCommand: gunicorn hvcs_project.wsgi:application --workers 2 --timeout 120
+    healthCheckPath: /accounts/
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ""          # Render sets RENDER_EXTERNAL_HOSTNAME automatically
+      - key: DATABASE_URL
+        fromDatabase:
+          name: hvcs-db
+          property: connectionString
+      - key: EMAIL_BACKEND
+        value: django.core.mail.backends.console.EmailBackend
