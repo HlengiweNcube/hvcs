@@ -1,3 +1,4 @@
+import csv
 import json
 import urllib.request
 
@@ -758,3 +759,52 @@ def send_schedule_email(request):
     return redirect('manager_dashboard')
 
 
+@role_required(User.Role.ADMIN, User.Role.MANAGER)
+def export_audit_report(request):
+    """Download a CSV audit report of all visits for a given date range."""
+    today = timezone.now().date()
+    default_from = today - timezone.timedelta(days=30)
+
+    date_from_str = request.GET.get('date_from', str(default_from))
+    date_to_str = request.GET.get('date_to', str(today))
+
+    try:
+        date_from = timezone.datetime.strptime(date_from_str, '%Y-%m-%d').date()
+        date_to = timezone.datetime.strptime(date_to_str, '%Y-%m-%d').date()
+    except ValueError:
+        date_from, date_to = default_from, today
+
+    visits = (
+        Visit.objects.filter(
+            scheduled_date__gte=date_from,
+            scheduled_date__lte=date_to,
+        )
+        .select_related('caregiver__user', 'client')
+        .order_by('scheduled_date', 'scheduled_time')
+    )
+
+    filename = f'hvcs_audit_{date_from}_{date_to}.csv'
+    from django.http import HttpResponse as _HR
+    response = _HR(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+    writer = csv.writer(response)
+    writer.writerow([
+        'Date', 'Time', 'Caregiver', 'Client',
+        'Status', 'Check-in Time', 'Check-out Time',
+        'GPS Address', 'Notes',
+    ])
+    for v in visits:
+        writer.writerow([
+            v.scheduled_date,
+            v.scheduled_time,
+            str(v.caregiver),
+            str(v.client),
+            v.get_status_display(),
+            v.check_in_time.strftime('%Y-%m-%d %H:%M') if v.check_in_time else '',
+            v.check_out_time.strftime('%Y-%m-%d %H:%M') if v.check_out_time else '',
+            v.check_in_address,
+            v.notes,
+        ])
+
+    return response

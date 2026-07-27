@@ -436,3 +436,49 @@ class MissingDocumentationAlertTests(TestCase):
         visit = make_visit(self.caregiver, self.client_obj, status=Visit.Status.SCHEDULED)
         response = self.client.get('/accounts/manager-dashboard/')
         self.assertNotIn(visit, response.context['alerts']['missing_notes'])
+
+
+# ---------------------------------------------------------------------------
+# Audit report CSV export tests
+# ---------------------------------------------------------------------------
+
+class AuditReportExportTests(TestCase):
+
+    def setUp(self):
+        self.manager = make_manager()
+        _, self.caregiver = make_caregiver_user()
+        self.client_obj = make_client()
+        self.client.login(username='manager', password='pass')
+
+    def test_export_returns_csv_response(self):
+        response = self.client.get('/accounts/audit-report/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'text/csv')
+        self.assertIn('attachment', response['Content-Disposition'])
+        self.assertIn('.csv', response['Content-Disposition'])
+
+    def test_export_contains_header_row(self):
+        response = self.client.get('/accounts/audit-report/')
+        content = response.content.decode()
+        self.assertIn('Date', content)
+        self.assertIn('Caregiver', content)
+        self.assertIn('Status', content)
+
+    def test_export_contains_visit_data(self):
+        visit = make_visit(self.caregiver, self.client_obj, status=Visit.Status.COMPLETED)
+        response = self.client.get('/accounts/audit-report/')
+        content = response.content.decode()
+        self.assertIn(str(visit.scheduled_date), content)
+
+    def test_export_excludes_visits_outside_date_range(self):
+        old_visit = make_visit(self.caregiver, self.client_obj, days_offset=-60)
+        response = self.client.get('/accounts/audit-report/')
+        content = response.content.decode()
+        self.assertNotIn(str(old_visit.scheduled_date), content)
+
+    def test_caregiver_cannot_access_export(self):
+        self.client.logout()
+        make_caregiver_user(username='cg_export')
+        self.client.login(username='cg_export', password='pass')
+        response = self.client.get('/accounts/audit-report/')
+        self.assertEqual(response.status_code, 403)

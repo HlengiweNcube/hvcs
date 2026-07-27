@@ -112,6 +112,19 @@
     </table>
 </div>
 
+<h2 class="section-title">Export Audit Report</h2>
+<form method="get" action="{% url 'export_audit_report' %}" class="form-shell form-shell--inline">
+    <div class="field-group">
+        <label for="date_from">From</label>
+        <input type="date" id="date_from" name="date_from">
+    </div>
+    <div class="field-group">
+        <label for="date_to">To</label>
+        <input type="date" id="date_to" name="date_to">
+    </div>
+    <button type="submit" class="button">Download CSV</button>
+</form>
+
 <h2 class="section-title">Send Schedule by Email</h2>
 <p class="page-text" style="color:var(--gray-500);margin-bottom:16px;">Email a caregiver their upcoming schedule directly — useful if they cannot log in.</p>
 
