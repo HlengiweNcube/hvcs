@@ -3,7 +3,7 @@
 {% block main_class %}page page--wide{% endblock %}
 {% block content %}
 
-<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+<div class="page-header">
     <div>
         <h1 class="page-title">Caregivers</h1>
         <p class="page-subtitle">Manage all caregiver accounts in the system</p>
@@ -15,13 +15,13 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Username</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Qualifications</th>
-                <th>Active</th>
-                <th>Actions</th>
+                <th scope="col">Username</th>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Qualifications</th>
+                <th scope="col">Active</th>
+                <th scope="col">Actions</th>
             </tr>
         </thead>
         <tbody>
