@@ -35,8 +35,10 @@ async function request(path, options = {}) {
 
   if (res.status === 401) {
     clearTokens()
-    window.location.href = '/react/login'
-    return
+    if (!window.location.pathname.endsWith('/login')) {
+      window.location.href = '/react/login'
+    }
+    throw new Error('Unauthorized')
   }
 
   if (!res.ok) {

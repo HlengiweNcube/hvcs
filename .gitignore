@@ -33,3 +33,7 @@ htmlcov/
 # Local backups
 *.backup
 *.bak
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/

@@ -158,7 +158,17 @@ STATIC_URL = 'static/'
 STATIC_URL = 'static/'
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Use compressed-only storage so Vite's already-hashed filenames are not
+# renamed again by Django's manifest pipeline (which would break index.html).
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
+# Include the React/Vite production build so collectstatic picks up the
+# hashed JS/CSS bundles.  Guard with .exists() so local devs who haven't
+# run `npm run build` yet don't get an ImproperlyConfigured error.
+_react_dist = BASE_DIR / 'frontend' / 'dist'
+if _react_dist.exists():
+    STATICFILES_DIRS = [_react_dist]
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 

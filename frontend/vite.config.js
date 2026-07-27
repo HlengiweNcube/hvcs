@@ -5,6 +5,11 @@ import react from '@vitejs/plugin-react'
 // In production, the React build is served from Django's staticfiles.
 export default defineConfig({
   plugins: [react()],
+  base: '/static/',
+  build: {
+    outDir: '../frontend/dist',
+    emptyOutDir: true,
+  },
   server: {
     proxy: {
       '/api': {
