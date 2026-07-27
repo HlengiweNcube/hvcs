@@ -403,3 +403,36 @@ class ManagerComplianceTests(TestCase):
         rows = response.context['caregiver_compliance']
         row = next(r for r in rows if r['caregiver'] == self.caregiver)
         self.assertEqual(row['rate'], 100)
+
+
+# ---------------------------------------------------------------------------
+# Manager dashboard — missing documentation alerts tests
+# ---------------------------------------------------------------------------
+
+class MissingDocumentationAlertTests(TestCase):
+
+    def setUp(self):
+        self.manager = make_manager()
+        _, self.caregiver = make_caregiver_user()
+        self.client_obj = make_client()
+        self.client.login(username='manager', password='pass')
+
+    def test_completed_visit_without_notes_appears_in_alert(self):
+        visit = make_visit(self.caregiver, self.client_obj, status=Visit.Status.COMPLETED)
+        visit.notes = ''
+        visit.save()
+        response = self.client.get('/accounts/manager-dashboard/')
+        self.assertIn(visit, response.context['alerts']['missing_notes'])
+
+    def test_completed_visit_with_notes_not_in_alert(self):
+        visit = make_visit(self.caregiver, self.client_obj, status=Visit.Status.COMPLETED)
+        visit.notes = 'Client was well.'
+        visit.save()
+        response = self.client.get('/accounts/manager-dashboard/')
+        self.assertNotIn(visit, response.context['alerts']['missing_notes'])
+
+    def test_scheduled_visit_without_notes_not_in_alert(self):
+        """Only COMPLETED visits with no notes trigger the alert."""
+        visit = make_visit(self.caregiver, self.client_obj, status=Visit.Status.SCHEDULED)
+        response = self.client.get('/accounts/manager-dashboard/')
+        self.assertNotIn(visit, response.context['alerts']['missing_notes'])

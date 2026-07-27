@@ -409,9 +409,19 @@ def manager_dashboard(request):
         })
     # -----------------------------------------------------------------------
 
+    missing_notes = list(
+        Visit.objects.filter(
+            status=Visit.Status.COMPLETED,
+            notes='',
+        )
+        .select_related('caregiver', 'client')
+        .order_by('-scheduled_date')[:20]
+    )
+
     alerts = {
         'missed_checkin': missed_checkin,
         'never_started': never_started,
+        'missing_notes': missing_notes,
     }
     return render(request, 'accounts/manager_dashboard.html', {
         'alerts': alerts,

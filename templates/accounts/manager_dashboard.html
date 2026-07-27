@@ -33,8 +33,19 @@
 </div>
 {% endif %}
 
-{% if not alerts.missed_checkin and not alerts.never_started %}
+{% if not alerts.missed_checkin and not alerts.never_started and not alerts.missing_notes %}
 <div class="alert alert--success">✅ All visits are on track. No alerts today.</div>
+{% endif %}
+
+{% if alerts.missing_notes %}
+<div class="alert alert--warning">
+    <strong>📋 Missing Documentation ({{ alerts.missing_notes|length }})</strong> — completed visits with no notes:
+    <ul>
+        {% for v in alerts.missing_notes %}
+            <li>{{ v.scheduled_date }} &mdash; {{ v.caregiver }} &rarr; {{ v.client }}</li>
+        {% endfor %}
+    </ul>
+</div>
 {% endif %}
 
 <h2 class="section-title">Today's Visits</h2>
