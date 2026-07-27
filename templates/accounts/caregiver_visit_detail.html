@@ -37,7 +37,13 @@
     {% if visit.check_in_lat %}
     <div class="visit-field">
         <div class="visit-field__key">GPS Location</div>
-        <div class="visit-field__val">{{ visit.check_in_lat }}, {{ visit.check_in_lng }}</div>
+        <div class="visit-field__val">
+            {% if visit.check_in_address %}
+                {{ visit.check_in_address }}
+            {% else %}
+                {{ visit.check_in_lat }}, {{ visit.check_in_lng }}
+            {% endif %}
+        </div>
     </div>
     {% endif %}
     {% endif %}

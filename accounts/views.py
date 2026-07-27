@@ -1,3 +1,6 @@
+import json
+import urllib.request
+
 from django import forms
 from django.contrib import messages
 from django.contrib.auth import login, logout
@@ -9,6 +12,27 @@ from django.utils import timezone
 
 from .decorators import role_required
 from .models import Caregiver, Client, User, Visit
+
+
+def reverse_geocode(lat, lng):
+    """Return a human-readable address for the given coordinates using the
+    free OpenStreetMap Nominatim API (no API key required).
+    Returns an empty string if the call fails for any reason.
+    """
+    url = (
+        f"https://nominatim.openstreetmap.org/reverse"
+        f"?lat={lat}&lon={lng}&format=json"
+    )
+    req = urllib.request.Request(
+        url,
+        headers={'User-Agent': 'HVCS/1.0 (home-visit-care-system)'},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode())
+            return data.get('display_name', '')
+    except Exception:
+        return ''
 
 
 class ClientForm(forms.ModelForm):
@@ -307,6 +331,8 @@ def caregiver_checkin(request, pk):
                 visit.check_in_lng = lng if lng else None
                 visit.check_in_time = timezone.now()
                 visit.status = Visit.Status.IN_PROGRESS
+                if lat and lng:
+                    visit.check_in_address = reverse_geocode(lat, lng)
                 visit.save()
             except Exception:
                 pass
