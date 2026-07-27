@@ -82,7 +82,10 @@
 <form method="post" class="form-shell">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="button">Save Notes</button>
+    <div class="action-row">
+        <button type="submit" class="button">Save Notes</button>
+        <a href="{% url 'caregiver_my_visits' %}" class="button-link">← Back to My Visits</a>
+    </div>
 </form>
 
 <script>

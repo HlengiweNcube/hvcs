@@ -313,6 +313,7 @@ def caregiver_visit_detail(request, pk):
         form = VisitNotesForm(request.POST, instance=visit)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Notes saved successfully.')
             return redirect('caregiver_visit_detail', pk=pk)
     else:
         form = VisitNotesForm(instance=visit)
