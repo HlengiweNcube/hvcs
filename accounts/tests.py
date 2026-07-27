@@ -348,3 +348,58 @@ class ReverseGeocodeTests(TestCase):
         visit.refresh_from_db()
         self.assertEqual(visit.status, Visit.Status.IN_PROGRESS)
         self.assertEqual(visit.check_in_address, '')
+
+
+# ---------------------------------------------------------------------------
+# Manager dashboard — caregiver compliance scores tests
+# ---------------------------------------------------------------------------
+
+class ManagerComplianceTests(TestCase):
+
+    def setUp(self):
+        self.manager = make_manager()
+        _, self.caregiver = make_caregiver_user()
+        self.client_obj = make_client()
+        self.client.login(username='manager', password='pass')
+
+    def test_manager_dashboard_loads(self):
+        response = self.client.get('/accounts/manager-dashboard/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_compliance_table_in_context(self):
+        """caregiver_compliance list is passed to the template."""
+        response = self.client.get('/accounts/manager-dashboard/')
+        self.assertIn('caregiver_compliance', response.context)
+
+    def test_compliance_rate_100_for_all_completed(self):
+        """A caregiver with all visits completed shows 100%."""
+        make_visit(self.caregiver, self.client_obj, status=Visit.Status.COMPLETED)
+        response = self.client.get('/accounts/manager-dashboard/')
+        rows = response.context['caregiver_compliance']
+        row = next(r for r in rows if r['caregiver'] == self.caregiver)
+        self.assertEqual(row['rate'], 100)
+
+    def test_compliance_rate_none_when_no_visits(self):
+        """A caregiver with no visits in the period shows rate=None."""
+        response = self.client.get('/accounts/manager-dashboard/')
+        rows = response.context['caregiver_compliance']
+        row = next(r for r in rows if r['caregiver'] == self.caregiver)
+        self.assertIsNone(row['rate'])
+
+    def test_compliance_rate_50_for_half_completed(self):
+        """Two visits, one completed → 50% compliance."""
+        make_visit(self.caregiver, self.client_obj, status=Visit.Status.COMPLETED)
+        make_visit(self.caregiver, self.client_obj, status=Visit.Status.SCHEDULED)
+        response = self.client.get('/accounts/manager-dashboard/')
+        rows = response.context['caregiver_compliance']
+        row = next(r for r in rows if r['caregiver'] == self.caregiver)
+        self.assertEqual(row['rate'], 50)
+
+    def test_cancelled_visits_excluded_from_compliance(self):
+        """Cancelled visits do not count towards the denominator."""
+        make_visit(self.caregiver, self.client_obj, status=Visit.Status.COMPLETED)
+        make_visit(self.caregiver, self.client_obj, status=Visit.Status.CANCELLED)
+        response = self.client.get('/accounts/manager-dashboard/')
+        rows = response.context['caregiver_compliance']
+        row = next(r for r in rows if r['caregiver'] == self.caregiver)
+        self.assertEqual(row['rate'], 100)

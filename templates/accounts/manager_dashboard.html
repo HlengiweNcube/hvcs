@@ -65,6 +65,42 @@
     </table>
 </div>
 
+<h2 class="section-title">Caregiver Compliance (Last 7 Days)</h2>
+<div class="table-wrapper">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Caregiver</th>
+                <th>Scheduled</th>
+                <th>Completed</th>
+                <th>Compliance Rate</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in caregiver_compliance %}
+                <tr>
+                    <td><strong>{{ row.caregiver }}</strong></td>
+                    <td>{{ row.total }}</td>
+                    <td>{{ row.completed }}</td>
+                    <td>
+                        {% if row.rate is None %}
+                            <span class="badge badge--gray">No visits</span>
+                        {% elif row.rate >= 80 %}
+                            <span class="badge badge--green">{{ row.rate }}%</span>
+                        {% elif row.rate >= 50 %}
+                            <span class="badge badge--amber">{{ row.rate }}%</span>
+                        {% else %}
+                            <span class="badge badge--red">{{ row.rate }}%</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="4" class="empty-row">No active caregivers.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
 <h2 class="section-title">Send Schedule by Email</h2>
 <p class="page-text" style="color:var(--gray-500);margin-bottom:16px;">Email a caregiver their upcoming schedule directly — useful if they cannot log in.</p>
 

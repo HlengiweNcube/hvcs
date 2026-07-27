@@ -356,6 +356,7 @@ def manager_dashboard(request):
     today = timezone.now().date()
     now = timezone.now()
     cutoff = now - timezone.timedelta(minutes=15)
+    week_ago = today - timezone.timedelta(days=7)
 
     missed_checkin = (
         Visit.objects.filter(
@@ -389,6 +390,25 @@ def manager_dashboard(request):
 
     caregivers = Caregiver.objects.filter(is_active=True).select_related('user').order_by('last_name', 'first_name')
 
+    # --- Per-caregiver compliance (last 7 days) ----------------------------
+    caregiver_compliance = []
+    for cg in caregivers:
+        qs = Visit.objects.filter(
+            caregiver=cg,
+            scheduled_date__gte=week_ago,
+            scheduled_date__lte=today,
+        ).exclude(status=Visit.Status.CANCELLED)
+        total = qs.count()
+        completed = qs.filter(status=Visit.Status.COMPLETED).count()
+        rate = round(completed / total * 100) if total else None
+        caregiver_compliance.append({
+            'caregiver': cg,
+            'total': total,
+            'completed': completed,
+            'rate': rate,
+        })
+    # -----------------------------------------------------------------------
+
     alerts = {
         'missed_checkin': missed_checkin,
         'never_started': never_started,
@@ -397,6 +417,7 @@ def manager_dashboard(request):
         'alerts': alerts,
         'todays_visits': todays_visits,
         'caregivers': caregivers,
+        'caregiver_compliance': caregiver_compliance,
     })
 
 
