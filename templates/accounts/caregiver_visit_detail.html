@@ -3,8 +3,8 @@
 {% block main_class %}page{% endblock %}
 {% block content %}
 
-<div style="display:flex;align-items:center;gap:16px;margin-bottom:6px;">
-    <h1 class="page-title" style="margin:0;">Visit Detail</h1>
+<div class="page-header page-header--tight">
+    <h1 class="page-title page-title--inline">Visit Detail</h1>
     {% if visit.status == 'SCHEDULED' %}<span class="status-pill status-pill--scheduled">Scheduled</span>
     {% elif visit.status == 'IN_PROGRESS' %}<span class="status-pill status-pill--inprogress">In Progress</span>
     {% elif visit.status == 'COMPLETED' %}<span class="status-pill status-pill--completed">Completed</span>
@@ -43,6 +43,11 @@
             {% else %}
                 {{ visit.check_in_lat }}, {{ visit.check_in_lng }}
             {% endif %}
+            <br>
+            <a href="https://www.openstreetmap.org/?mlat={{ visit.check_in_lat }}&mlon={{ visit.check_in_lng }}&zoom=17"
+               target="_blank" rel="noopener" class="action-link action-link--small">
+                📍 View on map
+            </a>
         </div>
     </div>
     {% endif %}
@@ -69,7 +74,7 @@
     </form>
 </div>
 {% elif visit.status == 'IN_PROGRESS' %}
-<div class="checkin-box" style="border-color:#d1fae5;">
+<div class="checkin-box checkin-box--complete">
     <h3>Complete this Visit</h3>
     <form method="post" action="{% url 'caregiver_checkout' visit.pk %}">
         {% csrf_token %}

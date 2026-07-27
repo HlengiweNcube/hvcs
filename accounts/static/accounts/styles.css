@@ -186,6 +186,10 @@ body {
     margin-bottom: 24px;
 }
 
+.page-header--tight  { margin-bottom: 6px; }
+.page-title--inline  { margin: 0; }
+.action-link--small  { font-size: .85rem; }
+
 .page-text,
 .error-text {
     margin: 0 0 16px;
@@ -801,6 +805,8 @@ body {
     padding: 20px 22px;
     margin-bottom: 20px;
 }
+
+.checkin-box--complete { border-color: #d1fae5; }
 
 .checkin-box h3 {
     margin: 0 0 12px;
