@@ -1,4 +1,6 @@
 import datetime
+import json
+from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
 from django.urls import reverse
@@ -285,3 +287,64 @@ class CheckInOutTests(TestCase):
             f'/accounts/caregiver-dashboard/visits/{other_visit.pk}/checkin/', {}
         )
         self.assertEqual(response.status_code, 404)
+
+
+# ---------------------------------------------------------------------------
+# OpenStreetMap Nominatim reverse-geocoding tests
+# ---------------------------------------------------------------------------
+
+class ReverseGeocodeTests(TestCase):
+    """Unit and integration tests for the Nominatim reverse-geocoding helper."""
+
+    def _mock_urlopen(self, display_name):
+        """Return a context-manager mock that yields a Nominatim JSON response."""
+        mock_resp = MagicMock()
+        mock_resp.read.return_value = json.dumps({'display_name': display_name}).encode()
+        mock_resp.__enter__ = lambda s: s
+        mock_resp.__exit__ = MagicMock(return_value=False)
+        return mock_resp
+
+    @patch('accounts.views.urllib.request.urlopen')
+    def test_returns_display_name_from_api(self, mock_urlopen):
+        """reverse_geocode returns the display_name from a successful API response."""
+        from accounts.views import reverse_geocode
+        mock_urlopen.return_value = self._mock_urlopen('14 Main Street, Johannesburg, South Africa')
+        result = reverse_geocode('-26.204103', '28.047305')
+        self.assertEqual(result, '14 Main Street, Johannesburg, South Africa')
+
+    @patch('accounts.views.urllib.request.urlopen', side_effect=Exception('Network error'))
+    def test_returns_empty_string_on_network_failure(self, mock_urlopen):
+        """reverse_geocode returns '' silently when the API is unreachable."""
+        from accounts.views import reverse_geocode
+        result = reverse_geocode('-26.204103', '28.047305')
+        self.assertEqual(result, '')
+
+    @patch('accounts.views.urllib.request.urlopen')
+    def test_checkin_with_gps_saves_resolved_address(self, mock_urlopen):
+        """check-in view populates check_in_address via the Nominatim API."""
+        mock_urlopen.return_value = self._mock_urlopen('22 Oak Avenue, Sandton, Gauteng')
+        user, caregiver = make_caregiver_user(username='cg_geo')
+        client_obj = make_client()
+        visit = make_visit(caregiver, client_obj)
+        self.client.login(username='cg_geo', password='pass')
+        self.client.post(
+            f'/accounts/caregiver-dashboard/visits/{visit.pk}/checkin/',
+            {'lat': '-26.107567', 'lng': '28.056702'},
+        )
+        visit.refresh_from_db()
+        self.assertEqual(visit.check_in_address, '22 Oak Avenue, Sandton, Gauteng')
+
+    @patch('accounts.views.urllib.request.urlopen', side_effect=Exception('timeout'))
+    def test_checkin_still_completes_when_geocode_fails(self, mock_urlopen):
+        """A Nominatim timeout must not prevent the check-in from completing."""
+        user, caregiver = make_caregiver_user(username='cg_fail')
+        client_obj = make_client()
+        visit = make_visit(caregiver, client_obj)
+        self.client.login(username='cg_fail', password='pass')
+        self.client.post(
+            f'/accounts/caregiver-dashboard/visits/{visit.pk}/checkin/',
+            {'lat': '-26.107567', 'lng': '28.056702'},
+        )
+        visit.refresh_from_db()
+        self.assertEqual(visit.status, Visit.Status.IN_PROGRESS)
+        self.assertEqual(visit.check_in_address, '')
