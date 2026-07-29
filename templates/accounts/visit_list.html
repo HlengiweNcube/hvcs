@@ -3,7 +3,7 @@
 {% block main_class %}page page--wide{% endblock %}
 {% block content %}
 
-<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+<div class="page-header">
     <div>
         <h1 class="page-title">All Visits</h1>
         <p class="page-subtitle">Schedule, track, and manage all home care visits</p>
@@ -12,7 +12,7 @@
 </div>
 
 <div class="filter-bar">
-    <form method="get" style="display:contents;">
+    <form method="get">
         <label>From
             <input type="date" name="date_from" value="{{ date_from }}">
         </label>

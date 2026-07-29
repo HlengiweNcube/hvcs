@@ -2,7 +2,7 @@
 {% block title %}Register — HVCS{% endblock %}
 {% block main_class %}auth-page{% endblock %}
 {% block content %}
-<div class="auth-card" style="max-width:520px;">
+<div class="auth-card auth-card--wide">
     <div class="auth-logo">
         <div class="auth-logo-text">HVCS</div>
         <div class="auth-logo-sub">Home Visit Care System</div>
@@ -13,7 +13,7 @@
     <form method="post" class="form-shell">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit" class="button" style="width:100%;justify-content:center;margin-top:8px;">Create Account</button>
+        <button type="submit" class="button button--full">Create Account</button>
     </form>
 
     <div class="auth-footer">

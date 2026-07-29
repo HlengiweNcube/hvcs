@@ -33,7 +33,7 @@
         {% endif %}
     </div>
     <div class="navbar-logout">
-        <form method="post" action="{% url 'logout' %}" style="margin:0">
+        <form method="post" action="{% url 'logout' %}">
             {% csrf_token %}
             <button type="submit" class="nav-btn">Logout</button>
         </form>
@@ -42,7 +42,7 @@
 {% endif %}
 
 {% if messages %}
-    <div style="max-width:960px;margin:16px auto 0;padding:0 24px;">
+    <div class="messages-banner">
         {% for message in messages %}
             <div class="alert alert--{% if message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}">
                 {{ message }}

@@ -6,11 +6,11 @@
 
 {% if user.is_authenticated %}
     {# Authenticated: redirect banner #}
-    <section style="max-width:640px;margin:60px auto;text-align:center;padding:0 24px;">
-        <div style="font-size:3rem;margin-bottom:16px;">👋</div>
-        <h1 style="font-size:1.8rem;font-weight:800;color:var(--gray-900);margin:0 0 10px;">Welcome back, {{ user.first_name|default:user.username }}.</h1>
-        <p style="color:var(--gray-500);margin:0 0 28px;">You're logged in as <strong>{{ user.get_role_display }}</strong>. Head to your dashboard to get started.</p>
-        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+    <section class="landing-auth-banner">
+        <div class="landing-auth-banner__icon">👋</div>
+        <h1 class="landing-auth-banner__title">Welcome back, {{ user.first_name|default:user.username }}.</h1>
+        <p class="landing-auth-banner__sub">You're logged in as <strong>{{ user.get_role_display }}</strong>. Head to your dashboard to get started.</p>
+        <div class="landing-auth-banner__actions">
             {% if user.role == 'ADMIN' %}
                 <a class="link-button" href="{% url 'admin_dashboard' %}">Go to Admin Dashboard</a>
             {% elif user.role == 'MANAGER' %}
@@ -124,13 +124,12 @@
     <section class="landing-cta">
         <h2>Ready to streamline your care operations?</h2>
         <p>Join HVCS today and bring visibility, accountability, and compliance to your home-care team.</p>
-        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-            <a class="link-button" href="{% url 'register' %}">Create Free Account</a>
+        <div class="landing-cta__actions">
             <a class="button-link" href="{% url 'login' %}">Sign In</a>
         </div>
     </section>
 
-    <footer style="text-align:center;padding:24px;font-size:0.82rem;color:var(--gray-400);border-top:1px solid var(--gray-200);">
+    <footer class="landing-footer">
         &copy; 2026 HVCS — Home Visit Care System. All rights reserved.
     </footer>
 {% endif %}

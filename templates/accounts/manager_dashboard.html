@@ -126,11 +126,11 @@
 </form>
 
 <h2 class="section-title">Send Schedule by Email</h2>
-<p class="page-text" style="color:var(--gray-500);margin-bottom:16px;">Email a caregiver their upcoming schedule directly — useful if they cannot log in.</p>
+<p class="page-text page-text--muted">Email a caregiver their upcoming schedule directly — useful if they cannot log in.</p>
 
-<form method="post" action="{% url 'send_schedule_email' %}" class="form-shell" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+<form method="post" action="{% url 'send_schedule_email' %}" class="form-shell form-shell--row">
     {% csrf_token %}
-    <div style="flex:1;min-width:200px;">
+    <div class="field-group">
         <label for="caregiver_id">Caregiver</label>
         <select name="caregiver_id" id="caregiver_id" required>
             <option value="">-- Select a caregiver --</option>
