@@ -254,7 +254,7 @@ body {
     gap: 6px;
     padding: 9px 18px;
     border-radius: var(--radius-sm);
-    border: none;
+    border: 1.5px solid transparent;
     background: var(--primary);
     color: var(--white);
     text-decoration: none;
