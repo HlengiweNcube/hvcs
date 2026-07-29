@@ -40,8 +40,8 @@
                         {% endif %}
                     </td>
                     <td>
-                        <a class="action-link" href="{% url 'caregiver_update' caregiver.id %}">Edit</a>
-                        <a class="action-link action-link--danger" href="{% url 'caregiver_delete' caregiver.id %}">Delete</a>
+                        <a class="action-link" href="{% url 'caregiver_update' caregiver.id %}" aria-label="Edit {{ caregiver.first_name }} {{ caregiver.last_name }}">Edit</a>
+                        <a class="action-link action-link--danger" href="{% url 'caregiver_delete' caregiver.id %}" aria-label="Delete {{ caregiver.first_name }} {{ caregiver.last_name }}">Delete</a>
                     </td>
                 </tr>
             {% empty %}

@@ -53,7 +53,7 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Time</th><th>Caregiver</th><th>Client</th><th>Status</th>
+                <th scope="col">Time</th><th scope="col">Caregiver</th><th scope="col">Client</th><th scope="col">Status</th>
             </tr>
         </thead>
         <tbody>
@@ -81,10 +81,10 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Caregiver</th>
-                <th>Scheduled</th>
-                <th>Completed</th>
-                <th>Compliance Rate</th>
+                <th scope="col">Caregiver</th>
+                <th scope="col">Scheduled</th>
+                <th scope="col">Completed</th>
+                <th scope="col">Compliance Rate</th>
             </tr>
         </thead>
         <tbody>
@@ -113,7 +113,7 @@
 </div>
 
 <h2 class="section-title">Export Audit Report</h2>
-<form method="get" action="{% url 'export_audit_report' %}" class="form-shell form-shell--inline">
+<form method="get" action="{% url 'export_audit_report' %}" class="form-shell form-shell--inline" aria-label="Export audit report">
     <div class="field-group">
         <label for="date_from">From</label>
         <input type="date" id="date_from" name="date_from">
@@ -128,7 +128,7 @@
 <h2 class="section-title">Send Schedule by Email</h2>
 <p class="page-text page-text--muted">Email a caregiver their upcoming schedule directly — useful if they cannot log in.</p>
 
-<form method="post" action="{% url 'send_schedule_email' %}" class="form-shell form-shell--row">
+<form method="post" action="{% url 'send_schedule_email' %}" class="form-shell form-shell--row" aria-label="Send schedule by email">
     {% csrf_token %}
     <div class="field-group">
         <label for="caregiver_id">Caregiver</label>

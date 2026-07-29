@@ -45,8 +45,9 @@
             {% endif %}
             <br>
             <a href="https://www.openstreetmap.org/?mlat={{ visit.check_in_lat }}&mlon={{ visit.check_in_lng }}&zoom=17"
-               target="_blank" rel="noopener" class="action-link action-link--small">
-                📍 View on map
+               target="_blank" rel="noopener" class="action-link action-link--small"
+               aria-label="View check-in location on OpenStreetMap (opens in new tab)">
+                <span aria-hidden="true">📍</span> View on map
             </a>
         </div>
     </div>
@@ -62,21 +63,23 @@
 
 {% if visit.status == 'SCHEDULED' %}
 <div class="checkin-box">
-    <h3>Check In to this Visit</h3>
-    <form id="checkin-form" method="post" action="{% url 'caregiver_checkin' visit.pk %}">
+    <h3 id="checkin-heading">Check In to this Visit</h3>
+    <form id="checkin-form" method="post" action="{% url 'caregiver_checkin' visit.pk %}" aria-labelledby="checkin-heading">
         {% csrf_token %}
         <input type="hidden" name="lat" id="checkin-lat">
         <input type="hidden" name="lng" id="checkin-lng">
         <div class="action-row">
-            <button type="button" class="button button--success" onclick="doCheckin()">📍 Check In with GPS</button>
+            <button type="button" class="button button--success" onclick="doCheckin()">
+                <span aria-hidden="true">📍</span> Check In with GPS
+            </button>
             <button type="submit" class="button-link">Check In (no GPS)</button>
         </div>
     </form>
 </div>
 {% elif visit.status == 'IN_PROGRESS' %}
 <div class="checkin-box checkin-box--complete">
-    <h3>Complete this Visit</h3>
-    <form method="post" action="{% url 'caregiver_checkout' visit.pk %}">
+    <h3 id="checkout-heading">Complete this Visit</h3>
+    <form method="post" action="{% url 'caregiver_checkout' visit.pk %}" aria-labelledby="checkout-heading">
         {% csrf_token %}
         <button type="submit" class="button button--success">✅ Check Out</button>
     </form>

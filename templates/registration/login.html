@@ -14,7 +14,7 @@
         <div class="alert alert--danger">Invalid username or password. Please try again.</div>
     {% endif %}
 
-    <form method="post" class="form-shell">
+    <form method="post" class="form-shell" aria-label="Sign in to HVCS">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="button button--full">Sign In</button>

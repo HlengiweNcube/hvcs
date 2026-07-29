@@ -8,9 +8,10 @@
     <link rel="stylesheet" href="{% static 'accounts/styles.css' %}">
 </head>
 <body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
 
 {% if user.is_authenticated %}
-<nav class="navbar">
+<nav class="navbar" aria-label="Main navigation">
     <a class="navbar-brand" href="{% url 'accounts_home' %}">
         HVCS
     </a>
@@ -42,7 +43,7 @@
 {% endif %}
 
 {% if messages %}
-    <div class="messages-banner">
+    <div class="messages-banner" role="alert" aria-live="polite">
         {% for message in messages %}
             <div class="alert alert--{% if message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}">
                 {{ message }}
@@ -51,7 +52,7 @@
     </div>
 {% endif %}
 
-<main class="{% block main_class %}page{% endblock %}">
+<main id="main-content" class="{% block main_class %}page{% endblock %}">
     {% block content %}{% endblock %}
 </main>
 

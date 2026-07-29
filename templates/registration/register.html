@@ -10,7 +10,7 @@
     <h1 class="auth-title">Create your account</h1>
     <p class="auth-sub">Register as a Caregiver to access the system</p>
 
-    <form method="post" class="form-shell">
+    <form method="post" class="form-shell" aria-label="Create a new HVCS account">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="button button--full">Create Account</button>
