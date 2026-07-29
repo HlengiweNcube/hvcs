@@ -22,6 +22,13 @@ class User(AbstractUser):
 
 
 class Caregiver(models.Model):
+    """
+    Profile record for a caregiver user.
+
+    Linked 1-to-1 to a User via a OneToOneField so that Django's auth
+    system handles credentials while this model stores care-specific data.
+    Deleting the User cascades and removes this profile automatically.
+    """
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='caregiver_profile')
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
@@ -37,6 +44,12 @@ class Caregiver(models.Model):
 
 
 class Client(models.Model):
+    """
+    A client who receives home care visits.
+
+    Clients are not Users — they do not log in.  Care needs are stored as
+    free text so that the system remains flexible across care types.
+    """
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     address = models.CharField(max_length=255)
@@ -52,6 +65,19 @@ class Client(models.Model):
 
 
 class Visit(models.Model):
+    """
+    A scheduled home care visit between a Caregiver and a Client.
+
+    Status transitions:
+      SCHEDULED → IN_PROGRESS (caregiver checks in)
+      IN_PROGRESS → COMPLETED  (caregiver checks out)
+      SCHEDULED / IN_PROGRESS → CANCELLED (admin cancels)
+
+    GPS coordinates (check_in_lat/lng) are optional — caregivers can check
+    in without location permission.  check_in_address is populated by the
+    reverse_geocode() helper after a successful GPS check-in.
+    """
+
     class Status(models.TextChoices):
         SCHEDULED = 'SCHEDULED', 'Scheduled'
         IN_PROGRESS = 'IN_PROGRESS', 'In Progress'

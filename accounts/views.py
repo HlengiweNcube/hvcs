@@ -37,13 +37,19 @@ def reverse_geocode(lat, lng):
 
 
 class ClientForm(forms.ModelForm):
+    """ModelForm for creating and editing Client records."""
     class Meta:
         model = Client
         fields = ('first_name', 'last_name', 'address', 'contact_phone', 'care_needs', 'is_active')
 
 
 class CaregiverCreateForm(UserCreationForm):
-    first_name = forms.CharField(max_length=100)
+    """
+    Admin form to create a new Caregiver.
+    Extends Django's built-in UserCreationForm to handle the linked User +
+    Caregiver profile in a single submission.  The User is given the
+    CAREGIVER role automatically so it cannot be set incorrectly.
+    """
     last_name = forms.CharField(max_length=100)
     phone = forms.CharField(max_length=30, required=False)
     qualifications = forms.CharField(max_length=255, required=False)
@@ -73,7 +79,11 @@ class CaregiverCreateForm(UserCreationForm):
 
 
 class CaregiverUpdateForm(forms.ModelForm):
-    username = forms.CharField(max_length=150)
+    """
+    Admin form to edit an existing Caregiver.
+    Surfaces User fields (username, email) alongside Caregiver profile
+    fields so both records can be updated in one form submission.
+    """
     email = forms.EmailField(required=False)
 
     class Meta:
@@ -101,14 +111,19 @@ class CaregiverUpdateForm(forms.ModelForm):
 
 
 def custom_logout(request):
+    """Log the current user out and redirect to the login page."""
     logout(request)
     return redirect('login')
 
 
 class SelfRegisterForm(UserCreationForm):
+    """
+    Public self-registration form for new caregivers.
+    Creates both the User account (with role=CAREGIVER) and the linked
+    Caregiver profile record in a single atomic save.
+    """
     first_name = forms.CharField(max_length=100)
     last_name = forms.CharField(max_length=100)
-    email = forms.EmailField(required=False)
     phone = forms.CharField(max_length=30, required=False)
     qualifications = forms.CharField(max_length=255, required=False)
 
@@ -137,6 +152,11 @@ class SelfRegisterForm(UserCreationForm):
 
 
 def register(request):
+    """
+    Public caregiver self-registration view.
+    On success the user is immediately logged in and sent to their
+    caregiver dashboard, so no separate login step is required.
+    """
     if request.user.is_authenticated:
         return redirect('accounts_home')
     if request.method == 'POST':
@@ -151,6 +171,11 @@ def register(request):
 
 
 class ManagerCreateForm(UserCreationForm):
+    """
+    Admin form to create a new Manager user.
+    Sets role=MANAGER automatically so the user gains manager-level access
+    immediately without any further configuration.
+    """
     first_name = forms.CharField(max_length=100)
     last_name = forms.CharField(max_length=100)
 
@@ -169,6 +194,7 @@ class ManagerCreateForm(UserCreationForm):
 
 
 class ManagerUpdateForm(forms.ModelForm):
+    """Admin form to edit an existing Manager's account details."""
     class Meta:
         model = User
         fields = ('username', 'email', 'first_name', 'last_name', 'is_active')
@@ -192,6 +218,19 @@ def dashboard(request):
 
 @role_required(User.Role.ADMIN)
 def admin_dashboard(request):
+    """
+    Admin dashboard: system-wide stats, live alerts, and a 7-day compliance
+    rate.  Two alert buckets are computed:
+
+    * missed_checkin  – visits scheduled today whose scheduled_time passed
+                        more than 15 minutes ago and are still SCHEDULED.
+    * never_started   – visits in the last 7 days whose scheduled_date has
+                        passed and are still SCHEDULED.
+
+    Compliance rate = completed / (all non-cancelled visits, last 7 days).
+    Scoping both alerts and the compliance rate to the same 7-day window
+    keeps the figures consistent.
+    """
     today = timezone.now().date()
     now = timezone.now()
     week_ago = today - timezone.timedelta(days=7)
@@ -276,6 +315,10 @@ def admin_dashboard(request):
 
 @role_required(User.Role.CAREGIVER)
 def caregiver_dashboard(request):
+    """
+    Caregiver personal dashboard: shows upcoming visits and navigation
+    shortcuts.  Only the caregiver's own data is ever loaded.
+    """
     caregiver = get_object_or_404(Caregiver, user=request.user)
     clients = Client.objects.filter(is_active=True)
     visits = Visit.objects.filter(caregiver=caregiver).select_related('client')
@@ -288,12 +331,14 @@ def caregiver_dashboard(request):
 
 @role_required(User.Role.CAREGIVER)
 def caregiver_my_profile(request):
+    """Display the logged-in caregiver's own profile (read-only)."""
     caregiver = get_object_or_404(Caregiver, user=request.user)
     return render(request, 'accounts/caregiver_profile.html', {'caregiver': caregiver})
 
 
 @role_required(User.Role.CAREGIVER)
 def caregiver_my_visits(request):
+    """List all visits assigned to the logged-in caregiver."""
     caregiver = get_object_or_404(Caregiver, user=request.user)
     visits = Visit.objects.filter(caregiver=caregiver).select_related('client')
     return render(request, 'accounts/caregiver_visits.html', {'caregiver': caregiver, 'visits': visits})
@@ -301,6 +346,10 @@ def caregiver_my_visits(request):
 
 @role_required(User.Role.CAREGIVER)
 def caregiver_my_clients(request):
+    """
+    List all active clients the caregiver has at least one visit for.
+    Uses a DISTINCT sub-query on visits to avoid loading every client.
+    """
     caregiver = get_object_or_404(Caregiver, user=request.user)
     client_ids = Visit.objects.filter(caregiver=caregiver).values_list('client_id', flat=True).distinct()
     clients = Client.objects.filter(id__in=client_ids, is_active=True)
@@ -309,6 +358,12 @@ def caregiver_my_clients(request):
 
 @role_required(User.Role.CAREGIVER)
 def caregiver_visit_detail(request, pk):
+    """
+    Show a single visit and allow the caregiver to add/edit notes.
+    Object-level security: the visit is fetched with caregiver=request.user's
+    profile so a caregiver cannot access another caregiver's visit by
+    guessing the URL.
+    """
     caregiver = get_object_or_404(Caregiver, user=request.user)
     visit = get_object_or_404(Visit, pk=pk, caregiver=caregiver)
     if request.method == 'POST':
@@ -324,6 +379,16 @@ def caregiver_visit_detail(request, pk):
 
 @role_required(User.Role.CAREGIVER)
 def caregiver_checkin(request, pk):
+    """
+    Record a GPS check-in for a SCHEDULED visit.
+
+    Accepts optional lat/lng POST fields captured by the browser
+    Geolocation API (see the inline JS in caregiver_visit_detail.html).
+    If coordinates are supplied, reverse_geocode() converts them to a
+    human-readable address via OpenStreetMap Nominatim.
+    Errors are silently swallowed so a failed geocode never blocks a
+    legitimate check-in.
+    """
     if request.method == 'POST':
         caregiver = get_object_or_404(Caregiver, user=request.user)
         visit = get_object_or_404(Visit, pk=pk, caregiver=caregiver)
@@ -345,6 +410,10 @@ def caregiver_checkin(request, pk):
 
 @role_required(User.Role.CAREGIVER)
 def caregiver_checkout(request, pk):
+    """
+    Mark an IN_PROGRESS visit as COMPLETED and record the check-out time.
+    Only accepts POST; GET requests are silently ignored.
+    """
     if request.method == 'POST':
         caregiver = get_object_or_404(Caregiver, user=request.user)
         visit = get_object_or_404(Visit, pk=pk, caregiver=caregiver)
@@ -357,6 +426,15 @@ def caregiver_checkout(request, pk):
 
 @role_required(User.Role.MANAGER)
 def manager_dashboard(request):
+    """
+    Manager dashboard: today's visits, live alerts, per-caregiver compliance
+    for the last 7 days, missing-documentation alerts, and a schedule email
+    tool.
+
+    Design note: Function-based view chosen over a class-based view because
+    the response aggregates data from multiple models and the logic does not
+    map cleanly onto a single queryset.
+    """
     today = timezone.now().date()
     now = timezone.now()
     cutoff = now - timezone.timedelta(minutes=15)
@@ -537,6 +615,7 @@ def client_create(request):
 
 @role_required(User.Role.ADMIN)
 def client_update(request, pk):
+    """Edit an existing client's details."""
     client = get_object_or_404(Client, pk=pk)
     if request.method == 'POST':
         form = ClientForm(request.POST, instance=client)
@@ -550,6 +629,7 @@ def client_update(request, pk):
 
 @role_required(User.Role.ADMIN)
 def client_delete(request, pk):
+    """Confirm and delete a client record."""
     client = get_object_or_404(Client, pk=pk)
     if request.method == 'POST':
         client.delete()
@@ -559,12 +639,14 @@ def client_delete(request, pk):
 
 @role_required(User.Role.ADMIN)
 def caregiver_list(request):
+    """List all caregiver accounts for admin management."""
     caregivers = Caregiver.objects.select_related('user').all()
     return render(request, 'accounts/caregiver_list.html', {'caregivers': caregivers})
 
 
 @role_required(User.Role.ADMIN)
 def caregiver_create(request):
+    """Create a new caregiver account and linked profile."""
     if request.method == 'POST':
         form = CaregiverCreateForm(request.POST)
         if form.is_valid():
@@ -577,6 +659,7 @@ def caregiver_create(request):
 
 @role_required(User.Role.ADMIN)
 def caregiver_update(request, pk):
+    """Edit an existing caregiver's account and profile details."""
     caregiver = get_object_or_404(Caregiver, pk=pk, user__role=User.Role.CAREGIVER)
     if request.method == 'POST':
         form = CaregiverUpdateForm(request.POST, instance=caregiver)
@@ -590,6 +673,10 @@ def caregiver_update(request, pk):
 
 @role_required(User.Role.ADMIN)
 def caregiver_delete(request, pk):
+    """
+    Confirm and delete a caregiver.  Deleting the User cascades to the
+    Caregiver profile and all associated visits via on_delete=CASCADE.
+    """
     caregiver = get_object_or_404(Caregiver, pk=pk, user__role=User.Role.CAREGIVER)
     if request.method == 'POST':
         caregiver.user.delete()
@@ -598,6 +685,7 @@ def caregiver_delete(request, pk):
 
 
 class VisitForm(forms.ModelForm):
+    """Admin form for scheduling and editing visits."""
     class Meta:
         model = Visit
         fields = ('caregiver', 'client', 'scheduled_date', 'scheduled_time', 'status', 'notes')
@@ -608,6 +696,7 @@ class VisitForm(forms.ModelForm):
 
 
 class VisitNotesForm(forms.ModelForm):
+    """Caregiver form to add or update visit notes only."""
     class Meta:
         model = Visit
         fields = ('notes',)
@@ -618,6 +707,12 @@ class VisitNotesForm(forms.ModelForm):
 
 @role_required(User.Role.ADMIN)
 def visit_list(request):
+    """
+    List all visits with optional date-range and status filters.
+    Filters are applied via GET parameters and preserved across page
+    reloads so the admin can bookmark or share a filtered URL.
+    """
+
     visits = Visit.objects.select_related('caregiver', 'client').all()
 
     # Optional filters
@@ -643,6 +738,7 @@ def visit_list(request):
 
 @role_required(User.Role.ADMIN)
 def visit_create(request):
+    """Schedule a new visit."""
     if request.method == 'POST':
         form = VisitForm(request.POST)
         if form.is_valid():
@@ -655,6 +751,7 @@ def visit_create(request):
 
 @role_required(User.Role.ADMIN)
 def visit_update(request, pk):
+    """Edit an existing visit's details."""
     visit = get_object_or_404(Visit, pk=pk)
     if request.method == 'POST':
         form = VisitForm(request.POST, instance=visit)
@@ -668,6 +765,7 @@ def visit_update(request, pk):
 
 @role_required(User.Role.ADMIN)
 def visit_delete(request, pk):
+    """Confirm and permanently delete a visit record."""
     visit = get_object_or_404(Visit, pk=pk)
     if request.method == 'POST':
         visit.delete()
@@ -677,12 +775,14 @@ def visit_delete(request, pk):
 
 @role_required(User.Role.ADMIN)
 def manager_list(request):
+    """List all manager accounts for admin management."""
     managers = User.objects.filter(role=User.Role.MANAGER)
     return render(request, 'accounts/manager_list.html', {'managers': managers})
 
 
 @role_required(User.Role.ADMIN)
 def manager_create(request):
+    """Create a new manager account."""
     if request.method == 'POST':
         form = ManagerCreateForm(request.POST)
         if form.is_valid():
@@ -695,6 +795,7 @@ def manager_create(request):
 
 @role_required(User.Role.ADMIN)
 def manager_update(request, pk):
+    """Edit an existing manager's account details."""
     manager = get_object_or_404(User, pk=pk, role=User.Role.MANAGER)
     if request.method == 'POST':
         form = ManagerUpdateForm(request.POST, instance=manager)
@@ -708,6 +809,7 @@ def manager_update(request, pk):
 
 @role_required(User.Role.ADMIN)
 def manager_delete(request, pk):
+    """Confirm and delete a manager account."""
     manager = get_object_or_404(User, pk=pk, role=User.Role.MANAGER)
     if request.method == 'POST':
         manager.delete()
