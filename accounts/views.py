@@ -214,15 +214,17 @@ def admin_dashboard(request):
         ) <= cutoff
     ]
 
-    # 2. Never-started: scheduled_date < today and still SCHEDULED
+    # 2. Never-started: scheduled_date in last 7 days and still SCHEDULED
     never_started = (
         Visit.objects.filter(
+            scheduled_date__gte=week_ago,
             scheduled_date__lt=today,
             status=Visit.Status.SCHEDULED,
         )
         .select_related('caregiver', 'client')
         .order_by('-scheduled_date')
     )
+
     alerts = {
         'missed_checkin': missed_checkin,
         'never_started': never_started,
@@ -377,6 +379,7 @@ def manager_dashboard(request):
 
     never_started = (
         Visit.objects.filter(
+            scheduled_date__gte=week_ago,
             scheduled_date__lt=today,
             status=Visit.Status.SCHEDULED,
         )
