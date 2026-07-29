@@ -44,8 +44,10 @@
         <label for="cd_date_to">To
             <input type="date" id="cd_date_to" name="date_to" value="{{ date_to }}">
         </label>
-        <button type="submit" class="button button--sm">Apply Filter</button>
-        <a class="button-link button--sm" href="{% url 'compliance_dashboard' %}">Reset</a>
+        <div class="filter-bar__actions">
+            <button type="submit" class="button button--sm">Apply Filter</button>
+            <a class="button button--sm button--secondary" href="{% url 'compliance_dashboard' %}">Reset to Default</a>
+        </div>
     </form>
 </div>
 
