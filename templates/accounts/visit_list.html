@@ -27,8 +27,10 @@
                 {% endfor %}
             </select>
         </label>
-        <button type="submit" class="button button--sm">Filter</button>
-        <a class="button-link button--sm" href="{% url 'visit_list' %}">Clear</a>
+        <div class="filter-bar__actions">
+            <button type="submit" class="button button--sm">Filter</button>
+            <a class="button button--sm button--secondary" href="{% url 'visit_list' %}">Clear</a>
+        </div>
     </form>
 </div>
 
