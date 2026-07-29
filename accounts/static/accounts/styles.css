@@ -1385,3 +1385,25 @@ body {
     .stat-grid { grid-template-columns: 1fr 1fr; }
     .hero-cta { flex-direction: column; align-items: center; }
 }
+
+/* ------------------------------------------------------------------ live clock */
+.live-clock {
+    text-align: center;
+    font-size: .9rem;
+    color: var(--gray-500);
+    margin-top: 24px;
+    letter-spacing: .03em;
+}
+
+/* ------------------------------------------------------------------ dash alert bar */
+.dash-alert-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--gray-100, #f3f4f6);
+    border: 1px solid var(--gray-200, #e5e7eb);
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-bottom: 20px;
+    font-size: .9rem;
+}

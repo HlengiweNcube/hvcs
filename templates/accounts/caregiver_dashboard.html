@@ -62,4 +62,26 @@
     </table>
 </div>
 
+<!-- Live clock — updates every second using the JS Date API -->
+<p class="live-clock" id="live-clock" aria-live="polite" aria-label="Current time"></p>
+
+<script>
+    /**
+     * liveClock — updates #live-clock every second.
+     * Uses Date.toLocaleTimeString() for locale-aware formatting.
+     * Design decision: setInterval chosen over requestAnimationFrame because
+     * 1-second granularity is sufficient and avoids unnecessary repaints.
+     */
+    function liveClock() {
+        const el = document.getElementById('live-clock');
+        if (!el) return;
+        const now = new Date();
+        el.textContent = now.toLocaleDateString(undefined, {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        }) + ' \u2014 ' + now.toLocaleTimeString();
+    }
+    liveClock();
+    setInterval(liveClock, 1000);
+</script>
+
 {% endblock %}

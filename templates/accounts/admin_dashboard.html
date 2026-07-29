@@ -72,6 +72,64 @@
     </div>
 </div>
 
+<!-- Live alert refresh — uses fetch() to poll the REST API without a full page reload.
+     Design decision: fetch chosen over XMLHttpRequest for cleaner async/await syntax.
+     The JWT for the session is not available in template context, so we fall back to
+     the session cookie (same-origin request); Django's IsAuthenticated allows this
+     because the request carries a valid session. -->
+<div class="dash-alert-bar">
+    <span id="live-alert-count" class="badge badge--amber">…</span>
+    <span id="live-alert-label">live alerts loading…</span>
+    <button class="button button--sm button--secondary" id="refresh-alerts-btn"
+            aria-label="Refresh alert count">↻ Refresh alerts</button>
+</div>
+
+<script>
+    /**
+     * refreshAlerts — fetches /api/v1/dashboard/admin/ and updates the
+     * alert badge with the current missed check-in count.
+     *
+     * Tried: polling with setInterval every 30 s — discarded because it
+     * generates background traffic even when the admin is not looking at
+     * the page.  Selected: manual refresh button so the request is only
+     * made on demand.
+     *
+     * Error handling: on network failure the badge shows 'offline' and
+     * the original server-rendered alerts remain visible above.
+     */
+    async function refreshAlerts() {
+        const countEl = document.getElementById('live-alert-count');
+        const labelEl = document.getElementById('live-alert-label');
+        countEl.textContent = '…';
+        labelEl.textContent = 'refreshing…';
+        try {
+            const res  = await fetch('/api/v1/dashboard/admin/', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin',
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            const missed  = (data.alerts && data.alerts.missed_checkin) ? data.alerts.missed_checkin.length : 0;
+            const started = (data.alerts && data.alerts.never_started)  ? data.alerts.never_started.length  : 0;
+            const total   = missed + started;
+            countEl.textContent = total;
+            countEl.className   = total > 0 ? 'badge badge--red' : 'badge badge--green';
+            labelEl.textContent = total > 0
+                ? `open alerts (${missed} missed check-in, ${started} never started)`
+                : 'no open alerts — all visits on track';
+        } catch (err) {
+            countEl.textContent = '?';
+            countEl.className   = 'badge badge--gray';
+            labelEl.textContent = 'could not load live data (offline?)';
+        }
+    }
+
+    // Load on page open.
+    refreshAlerts();
+    // Wire up the manual refresh button.
+    document.getElementById('refresh-alerts-btn').addEventListener('click', refreshAlerts);
+</script>
+
 <h2 class="section-title">Today's Visits</h2>
 <div class="table-wrapper">
     <table class="data-table">

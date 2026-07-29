@@ -74,4 +74,64 @@
     </table>
 </div>
 
+<script>
+    /**
+     * Visit list — localStorage filter persistence.
+     *
+     * Design decision: localStorage chosen over sessionStorage so the last
+     * filter survives browser restarts (useful for administrators who check
+     * the same caregiver daily).  The stored value is cleared when the user
+     * explicitly clicks 'Clear'.
+     *
+     * Flow:
+     *  1. On DOMContentLoaded: if no query string is present, read the saved
+     *     filter from localStorage and pre-fill the form inputs.
+     *  2. On form submit: write current input values to localStorage.
+     *  3. On 'Clear': remove the saved values from localStorage, then navigate.
+     */
+    (function () {
+        const LS_KEY = 'hvcs_visit_filter';
+        const form   = document.querySelector('.filter-bar form');
+        const inputs = {
+            status:    document.getElementById('vl_status'),
+            date_from: document.getElementById('vl_date_from'),
+            date_to:   document.getElementById('vl_date_to'),
+        };
+
+        // Restore saved filter only when URL has no active query string.
+        if (!window.location.search && form) {
+            try {
+                const saved = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
+                if (saved) {
+                    if (inputs.status    && saved.status)    inputs.status.value    = saved.status;
+                    if (inputs.date_from && saved.date_from) inputs.date_from.value = saved.date_from;
+                    if (inputs.date_to   && saved.date_to)   inputs.date_to.value   = saved.date_to;
+                }
+            } catch (e) { /* corrupt localStorage — ignore */ }
+        }
+
+        // Persist filter values on submit.
+        if (form) {
+            form.addEventListener('submit', function () {
+                const data = {
+                    status:    inputs.status    ? inputs.status.value    : '',
+                    date_from: inputs.date_from ? inputs.date_from.value : '',
+                    date_to:   inputs.date_to   ? inputs.date_to.value   : '',
+                };
+                try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch (e) {}
+            });
+        }
+
+        // 'Clear' button — wipe stored filter before navigating.
+        const clearBtn = form && form.querySelector('button[onclick]');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                try { localStorage.removeItem(LS_KEY); } catch (err) {}
+                window.location.href = '{% url "visit_list" %}';
+            }, true);
+        }
+    }());
+</script>
+
 {% endblock %}
