@@ -46,7 +46,8 @@
         </label>
         <div class="filter-bar__actions">
             <button type="submit" class="button button--sm">Apply Filter</button>
-            <a class="button button--sm button--secondary" href="{% url 'compliance_dashboard' %}">Reset to Default</a>
+            <button type="button" class="button button--sm button--secondary"
+                    onclick="window.location.href='{% url 'compliance_dashboard' %}'">Reset to Default</button>
         </div>
     </form>
 </div>

@@ -29,7 +29,8 @@
         </label>
         <div class="filter-bar__actions">
             <button type="submit" class="button button--sm">Filter</button>
-            <a class="button button--sm button--secondary" href="{% url 'visit_list' %}">Clear</a>
+            <button type="button" class="button button--sm button--secondary"
+                    onclick="window.location.href='{% url 'visit_list' %}'">Clear</button>
         </div>
     </form>
 </div>
