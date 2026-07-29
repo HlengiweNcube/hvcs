@@ -319,9 +319,10 @@ body {
    ===================================================================== */
 .stat-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 16px;
     margin-bottom: 28px;
+    justify-items: center;
 }
 
 .stat-card {
@@ -335,6 +336,8 @@ body {
     box-shadow: var(--shadow-sm);
     position: relative;
     overflow: hidden;
+    width: 100%;
+    text-align: center;
 }
 
 .stat-card::before {
