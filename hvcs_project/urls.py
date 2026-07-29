@@ -2,6 +2,8 @@
 from django.contrib.auth import views as auth_views
 from django.urls import include, path, re_path
 from django.http import HttpResponse
+from django.conf import settings
+from django.conf.urls.static import static
 from pathlib import Path
 
 from accounts import views as account_views
@@ -32,4 +34,4 @@ urlpatterns = [
 
     # React SPA — catch all /react/* paths and return the built index.html
     re_path(r'^react/.*$', react_spa),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

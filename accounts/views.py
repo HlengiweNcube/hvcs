@@ -88,7 +88,7 @@ class CaregiverUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Caregiver
-        fields = ('first_name', 'last_name', 'phone', 'qualifications', 'is_active')
+        fields = ('first_name', 'last_name', 'phone', 'qualifications', 'profile_image', 'is_active')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -662,7 +662,7 @@ def caregiver_update(request, pk):
     """Edit an existing caregiver's account and profile details."""
     caregiver = get_object_or_404(Caregiver, pk=pk, user__role=User.Role.CAREGIVER)
     if request.method == 'POST':
-        form = CaregiverUpdateForm(request.POST, instance=caregiver)
+        form = CaregiverUpdateForm(request.POST, request.FILES, instance=caregiver)
         if form.is_valid():
             form.save()
             return redirect('caregiver_list')

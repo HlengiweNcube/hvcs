@@ -7,7 +7,13 @@
 <p class="page-subtitle">Your personal information on record</p>
 
 <div class="profile-card">
-    <div class="profile-avatar">{{ caregiver.first_name|first }}{{ caregiver.last_name|first }}</div>
+    <div class="profile-avatar">
+        {% if caregiver.profile_image %}
+            <img src="{{ caregiver.profile_image.url }}" alt="Profile photo of {{ caregiver.first_name }} {{ caregiver.last_name }}" class="profile-avatar__img">
+        {% else %}
+            {{ caregiver.first_name|first }}{{ caregiver.last_name|first }}
+        {% endif %}
+    </div>
     <div class="profile-info">
         <h2>{{ caregiver.first_name }} {{ caregiver.last_name }}</h2>
         <p>@{{ request.user.username }} &bull; Caregiver</p>

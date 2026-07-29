@@ -1,0 +1,151 @@
+﻿python : Creating test database for alias 'default' 
+('file:memorydb_default?mode=memory&cache=shared')...
+At line:1 char:65
++ ... on_evidence -Force ; python manage.py test accounts -v 2 2>&1 | Out-F ...
++                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Creating test d...che=shared')... 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+Found 41 test(s).
+Operations to perform:
+  Synchronize unmigrated apps: corsheaders, humanize, messages, rest_framework, rest_framework_simplejwt, staticfiles
+  Apply all migrations: accounts, admin, auth, contenttypes, sessions
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying accounts.0002_client... OK
+  Applying accounts.0003_caregiver... OK
+  Applying accounts.0004_align_client_to_erd... OK
+  Applying accounts.0005_visit... OK
+  Applying accounts.0006_visit_gps_checkin... OK
+  Applying accounts.0007_visit_check_in_address... OK
+  Applying accounts.0008_profile_image... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+test_caregiver_cannot_access_export 
+(accounts.tests.AuditReportExportTests.test_caregiver_cannot_access_export) 
+... C:\Users\hlehl\AppData\Local\Programs\Python\Python313\Lib\site-packages\dj
+ango\core\handlers\base.py:62: UserWarning: No directory at: 
+C:\Users\hlehl\Desktop\hvcs\staticfiles\
+  mw_instance = middleware(adapted_handler)
+ok
+test_export_contains_header_row 
+(accounts.tests.AuditReportExportTests.test_export_contains_header_row) ... ok
+test_export_contains_visit_data 
+(accounts.tests.AuditReportExportTests.test_export_contains_visit_data) ... ok
+test_export_excludes_visits_outside_date_range (accounts.tests.AuditReportExpor
+tTests.test_export_excludes_visits_outside_date_range) ... ok
+test_export_returns_csv_response 
+(accounts.tests.AuditReportExportTests.test_export_returns_csv_response) ... ok
+test_admin_redirected_to_admin_dashboard 
+(accounts.tests.AuthTests.test_admin_redirected_to_admin_dashboard) ... ok
+test_caregiver_cannot_access_admin_dashboard 
+(accounts.tests.AuthTests.test_caregiver_cannot_access_admin_dashboard) ... ok
+test_caregiver_login_nonexistent_user_stays_on_login 
+(accounts.tests.AuthTests.test_caregiver_login_nonexistent_user_stays_on_login)
+Caregiver submits credentials for a username that does not exist. ... ok
+test_caregiver_login_wrong_password_stays_on_login 
+(accounts.tests.AuthTests.test_caregiver_login_wrong_password_stays_on_login)
+Caregiver submits the correct username but wrong password ù stays on login 
+page. ... ok
+test_caregiver_redirected_to_caregiver_dashboard 
+(accounts.tests.AuthTests.test_caregiver_redirected_to_caregiver_dashboard) 
+... ok
+test_inactive_caregiver_cannot_login 
+(accounts.tests.AuthTests.test_inactive_caregiver_cannot_login)
+A caregiver whose account has been deactivated is refused login. ... ok
+test_manager_redirected_to_manager_dashboard 
+(accounts.tests.AuthTests.test_manager_redirected_to_manager_dashboard) ... ok
+test_root_shows_login_when_unauthenticated 
+(accounts.tests.AuthTests.test_root_shows_login_when_unauthenticated) ... ok
+test_unauthenticated_dashboard_redirects_to_login 
+(accounts.tests.AuthTests.test_unauthenticated_dashboard_redirects_to_login) 
+... ok
+test_caregiver_cannot_checkin_others_visit 
+(accounts.tests.CheckInOutTests.test_caregiver_cannot_checkin_others_visit) 
+... ok
+test_checkin_with_gps (accounts.tests.CheckInOutTests.test_checkin_with_gps) 
+... ok
+test_checkin_without_gps 
+(accounts.tests.CheckInOutTests.test_checkin_without_gps) ... ok
+test_checkout_after_checkin 
+(accounts.tests.CheckInOutTests.test_checkout_after_checkin) ... ok
+test_client_create (accounts.tests.ClientCRUDTests.test_client_create) ... ok
+test_client_delete (accounts.tests.ClientCRUDTests.test_client_delete) ... ok
+test_client_list (accounts.tests.ClientCRUDTests.test_client_list) ... ok
+test_client_update (accounts.tests.ClientCRUDTests.test_client_update) ... ok
+test_cancelled_visits_excluded_from_compliance (accounts.tests.ManagerComplianc
+eTests.test_cancelled_visits_excluded_from_compliance)
+Cancelled visits do not count towards the denominator. ... ok
+test_compliance_rate_100_for_all_completed (accounts.tests.ManagerComplianceTes
+ts.test_compliance_rate_100_for_all_completed)
+A caregiver with all visits completed shows 100%. ... ok
+test_compliance_rate_50_for_half_completed (accounts.tests.ManagerComplianceTes
+ts.test_compliance_rate_50_for_half_completed)
+Two visits, one completed \u2192 50% compliance. ... ok
+test_compliance_rate_none_when_no_visits (accounts.tests.ManagerComplianceTests
+.test_compliance_rate_none_when_no_visits)
+A caregiver with no visits in the period shows rate=None. ... ok
+test_compliance_table_in_context 
+(accounts.tests.ManagerComplianceTests.test_compliance_table_in_context)
+caregiver_compliance list is passed to the template. ... ok
+test_manager_dashboard_loads 
+(accounts.tests.ManagerComplianceTests.test_manager_dashboard_loads) ... ok
+test_completed_visit_with_notes_not_in_alert (accounts.tests.MissingDocumentati
+onAlertTests.test_completed_visit_with_notes_not_in_alert) ... ok
+test_completed_visit_without_notes_appears_in_alert (accounts.tests.MissingDocu
+mentationAlertTests.test_completed_visit_without_notes_appears_in_alert) ... ok
+test_scheduled_visit_without_notes_not_in_alert (accounts.tests.MissingDocument
+ationAlertTests.test_scheduled_visit_without_notes_not_in_alert)
+Only COMPLETED visits with no notes trigger the alert. ... ok
+test_register_creates_caregiver_user 
+(accounts.tests.RegistrationTests.test_register_creates_caregiver_user) ... ok
+test_register_logs_in_and_redirects_to_caregiver_dashboard (accounts.tests.Regi
+strationTests.test_register_logs_in_and_redirects_to_caregiver_dashboard) ... 
+ok
+test_checkin_still_completes_when_geocode_fails (accounts.tests.ReverseGeocodeT
+ests.test_checkin_still_completes_when_geocode_fails)
+A Nominatim timeout must not prevent the check-in from completing. ... ok
+test_checkin_with_gps_saves_resolved_address (accounts.tests.ReverseGeocodeTest
+s.test_checkin_with_gps_saves_resolved_address)
+check-in view populates check_in_address via the Nominatim API. ... ok
+test_returns_display_name_from_api 
+(accounts.tests.ReverseGeocodeTests.test_returns_display_name_from_api)
+reverse_geocode returns the display_name from a successful API response. ... ok
+test_returns_empty_string_on_network_failure (accounts.tests.ReverseGeocodeTest
+s.test_returns_empty_string_on_network_failure)
+reverse_geocode returns '' silently when the API is unreachable. ... ok
+test_visit_create (accounts.tests.VisitCRUDTests.test_visit_create) ... ok
+test_visit_delete (accounts.tests.VisitCRUDTests.test_visit_delete) ... ok
+test_visit_list (accounts.tests.VisitCRUDTests.test_visit_list) ... ok
+test_visit_list_filter_by_status 
+(accounts.tests.VisitCRUDTests.test_visit_list_filter_by_status) ... ok
+
+----------------------------------------------------------------------
+Ran 41 tests in 80.349s
+
+OK
+Destroying test database for alias 'default' 
+('file:memorydb_default?mode=memory&cache=shared')...
+
+  Applying sessions.0001_initial... OK
+System check identified no issues (0 silenced).

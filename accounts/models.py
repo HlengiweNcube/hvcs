@@ -34,6 +34,7 @@ class Caregiver(models.Model):
     last_name = models.CharField(max_length=100)
     phone = models.CharField(max_length=30, blank=True)
     qualifications = models.CharField(max_length=255, blank=True)
+    profile_image = models.ImageField(upload_to='caregiver_photos/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
 
     class Meta:
