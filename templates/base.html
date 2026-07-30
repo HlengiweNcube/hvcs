@@ -16,39 +16,62 @@
     <a class="navbar-brand" href="{% url 'accounts_home' %}">
         HVCS
     </a>
-    <div class="navbar-links">
-        {% if user.role == 'ADMIN' %}
-            <a href="{% url 'admin_dashboard' %}">Dashboard</a>
-            <a href="{% url 'client_list' %}">Clients</a>
-            <a href="{% url 'caregiver_list' %}">Caregivers</a>
-            <a href="{% url 'visit_list' %}">Visits</a>
-            <a href="{% url 'manager_list' %}">Managers</a>
-            <a href="{% url 'compliance_dashboard' %}">Compliance</a>
-        {% elif user.role == 'MANAGER' %}
-            <a href="{% url 'manager_dashboard' %}">Dashboard</a>
-            <a href="{% url 'compliance_dashboard' %}">Compliance</a>
-        {% else %}
-            <a href="{% url 'caregiver_dashboard' %}">Dashboard</a>
-            <a href="{% url 'caregiver_my_visits' %}">My Visits</a>
-            <a href="{% url 'caregiver_my_clients' %}">My Clients</a>
-            <a href="{% url 'caregiver_my_profile' %}">My Profile</a>
-        {% endif %}
-    </div>
-    <div class="navbar-logout">
-        <form method="post" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button type="submit" class="nav-btn">Logout</button>
-        </form>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+    </button>
+    <div class="navbar-menu">
+        <div class="navbar-links">
+            {% if user.role == 'ADMIN' %}
+                <a href="{% url 'admin_dashboard' %}">Dashboard</a>
+                <a href="{% url 'client_list' %}">Clients</a>
+                <a href="{% url 'caregiver_list' %}">Caregivers</a>
+                <a href="{% url 'visit_list' %}">Visits</a>
+                <a href="{% url 'manager_list' %}">Managers</a>
+                <a href="{% url 'compliance_dashboard' %}">Compliance</a>
+            {% elif user.role == 'MANAGER' %}
+                <a href="{% url 'manager_dashboard' %}">Dashboard</a>
+                <a href="{% url 'compliance_dashboard' %}">Compliance</a>
+            {% else %}
+                <a href="{% url 'caregiver_dashboard' %}">Dashboard</a>
+                <a href="{% url 'caregiver_my_visits' %}">My Visits</a>
+                <a href="{% url 'caregiver_my_clients' %}">My Clients</a>
+                <a href="{% url 'caregiver_my_profile' %}">My Profile</a>
+            {% endif %}
+        </div>
+        <div class="navbar-logout">
+            <form method="post" id="logout-form" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="nav-btn">Logout</button>
+            </form>
+        </div>
     </div>
 </nav>
+<script>
+    document.querySelector('.nav-toggle').addEventListener('click', function () {
+        var menu = document.querySelector('.navbar-menu');
+        var open = menu.classList.toggle('open');
+        this.classList.toggle('open', open);
+        this.setAttribute('aria-expanded', open);
+    });
+</script>
 {% endif %}
 
 {% if messages %}
     <div class="messages-banner" role="alert" aria-live="polite">
         {% for message in messages %}
-            <div class="alert alert--{% if message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}">
-                {{ message }}
-            </div>
+            {% if message.tags == 'error' %}
+                <div class="message-alert alert--danger">
+                    {{ message }}
+                </div>
+            {% elif message.tags == 'warning' %}
+                <div class="message-alert alert--warning">
+                    {{ message }}
+                </div>
+            {% else %}
+                <div class="message-alert alert--success">
+                    {{ message }}
+                </div>
+            {% endif %}
         {% endfor %}
     </div>
 {% endif %}
