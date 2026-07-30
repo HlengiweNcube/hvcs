@@ -16,6 +16,14 @@ class User(AbstractUser):
         default=Role.CAREGIVER,
         help_text='Determines what this user can see and do.',
     )
+    # Admin who created this account (FK: Admin → Manager / Admin → Caregiver)
+    created_by = models.ForeignKey(
+        'self',
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='created_users',
+        limit_choices_to={'role': Role.ADMIN},
+    )
 
     def __str__(self):
         return f'{self.username} ({self.get_role_display()})'
@@ -47,6 +55,14 @@ class Caregiver(models.Model):
         default=EmploymentStatus.ACTIVE,
     )
     date_left = models.DateField(null=True, blank=True, help_text='Date the caregiver left the organisation.')
+    # Manager responsible for supervising this caregiver (FK: Manager → Caregiver)
+    supervised_by = models.ForeignKey(
+        User,
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='supervised_caregivers',
+        limit_choices_to={'role': User.Role.MANAGER},
+    )
 
     class Meta:
         ordering = ('last_name', 'first_name')
@@ -91,6 +107,13 @@ class Client(models.Model):
     contact_phone = models.CharField(max_length=30, blank=True)
     care_needs = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
+    # Primary caregiver assigned to this client (FK: Caregiver → many Clients)
+    assigned_caregiver = models.ForeignKey(
+        'Caregiver',
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='assigned_clients',
+    )
 
     class Meta:
         ordering = ('last_name', 'first_name')
