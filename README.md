@@ -76,7 +76,11 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-When prompted, set the role to `ADMIN` or update it via the admin panel at `/admin/`.
+Django will prompt for a username, email, and password and write the record directly to the database — no browser required. The `ensure_superuser` management command (used on Render) does the same thing from environment variables and sets `role = ADMIN` automatically.
+
+This is the only way to create an Admin account and is intentional — admin accounts are provisioned by a system administrator at the command line, not through the web UI. This is a Django security best practice: it prevents anyone from self-registering as an administrator through a web form.
+
+Once the admin account exists, all subsequent Managers and Caregivers are created through the web interface by the logged-in admin at `/accounts/managers/add/` and `/accounts/caregivers/add/`.
 
 ### 6. Install React dependencies
 
