@@ -1,4 +1,5 @@
 
+from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path, re_path
 from django.http import HttpResponse
@@ -21,6 +22,7 @@ def react_spa(request, path=''):
     )
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
     # Legacy Django-template views (unchanged)
     path('accounts/', include('accounts.urls')),
     path('dashboard/', account_views.dashboard, name='dashboard'),
