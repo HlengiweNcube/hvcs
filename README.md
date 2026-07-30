@@ -533,3 +533,156 @@ Django's `LoginView` (a CBV) is already used for the login page.
 
 The `ensure_superuser` management command creates the initial admin user from `DJANGO_SUPERUSER_*` environment variables so the first login does not require shell access.
 
+---
+
+## Configuration Reference
+
+All runtime behaviour is controlled through environment variables read in `hvcs_project/settings.py`. No values are hard-coded except safe development defaults.
+
+### Environment Variables
+
+| Variable | Default | Required in production | Description |
+|---|---|---|---|
+| `SECRET_KEY` | insecure dev string | **Yes** | Django signing key — must be a random 50-character string in production |
+| `DEBUG` | `True` | **Yes** (`False`) | Enables Django debug mode; must be `False` in production |
+| `ALLOWED_HOSTS` | `localhost,127.0.0.1` | **Yes** | Comma-separated list of hostnames Django will serve; Render's hostname is appended automatically via `RENDER_EXTERNAL_HOSTNAME` |
+| `DATABASE_URL` | SQLite fallback | **Yes** | Full DSN for the database; Render injects this automatically from the linked PostgreSQL add-on |
+| `CORS_ALLOWED_ORIGINS` | `http://localhost:5173` | No | Comma-separated list of origins allowed to call the REST API from a browser (React dev server in development) |
+| `EMAIL_BACKEND` | console backend | No | Set to `django.core.mail.backends.smtp.EmailBackend` to send real emails |
+| `EMAIL_HOST` | `smtp.gmail.com` | No | SMTP server hostname |
+| `EMAIL_PORT` | `587` | No | SMTP port |
+| `EMAIL_USE_TLS` | `True` | No | Enable STARTTLS for the SMTP connection |
+| `EMAIL_HOST_USER` | _(empty)_ | No | SMTP login username |
+| `EMAIL_HOST_PASSWORD` | _(empty)_ | No | SMTP login password |
+| `DEFAULT_FROM_EMAIL` | `noreply@hvcs.local` | No | Sender address for all outgoing emails |
+| `DJANGO_SUPERUSER_USERNAME` | _(empty)_ | No | Used by `ensure_superuser` to create the first admin account on deploy |
+| `DJANGO_SUPERUSER_PASSWORD` | _(empty)_ | No | Password for the auto-created superuser |
+| `DJANGO_SUPERUSER_EMAIL` | _(empty)_ | No | Email for the auto-created superuser |
+
+### Database Configuration
+
+`settings.py` checks for `DATABASE_URL` at startup:
+
+```python
+database_url = os.getenv('DATABASE_URL')
+if database_url:
+    DATABASES = {'default': dj_database_url.parse(database_url, conn_max_age=600)}
+else:
+    DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': BASE_DIR / 'db.sqlite3'}}
+```
+
+- **Local development** — SQLite file at `db.sqlite3` (no setup needed)
+- **Production (Render)** — PostgreSQL via `DATABASE_URL`; SSL is enforced automatically when the URL starts with `postgres://`
+- `conn_max_age=600` keeps database connections alive for 10 minutes (connection pooling)
+
+### Django REST Framework
+
+```python
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # React SPA
+        'rest_framework.authentication.SessionAuthentication',         # Django template AJAX
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+```
+
+Two authentication backends are active simultaneously:
+- **JWTAuthentication** — used by the React SPA; the client sends `Authorization: Bearer <token>`
+- **SessionAuthentication** — used by Django template pages that make AJAX calls to the API (e.g., the live alert badge on the admin dashboard)
+
+### JWT Token Settings
+
+```python
+SIMPLEJWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=8),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+```
+
+| Setting | Value | Reason |
+|---|---|---|
+| `ACCESS_TOKEN_LIFETIME` | 8 hours | Long enough for a full working shift without re-login |
+| `REFRESH_TOKEN_LIFETIME` | 7 days | Allows background token rotation without forcing weekly re-login |
+| `AUTH_HEADER_TYPES` | `Bearer` | Standard OAuth2 header format |
+
+### CORS Configuration
+
+```python
+CORS_ALLOWED_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173']
+CORS_ALLOW_CREDENTIALS = True
+```
+
+CORS is only needed during development when the React dev server (port 5173) calls the Django API (port 8000). In production on Render both are served from the same origin so CORS headers are not required.
+
+Override for a custom domain:
+```
+CORS_ALLOWED_ORIGINS=https://myapp.onrender.com,https://myotherdomain.com
+```
+
+### Static Files (WhiteNoise)
+
+```python
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+```
+
+WhiteNoise serves static files directly from the Django process without a separate web server:
+- `CompressedStaticFilesStorage` — pre-compresses files with gzip at build time; does not rename already-hashed Vite filenames
+- `STATIC_ROOT` — `collectstatic` copies all static files here before deployment
+- The React/Vite production build (`frontend/dist/`) is included in `STATICFILES_DIRS` so `collectstatic` picks up the hashed JS/CSS bundles automatically
+
+### Email Configuration
+
+The default `console` backend prints emails to stdout (useful for local development to test password-reset flows without a real mail server).
+
+To enable real email in production, set these environment variables:
+
+```
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=your@gmail.com
+EMAIL_HOST_PASSWORD=your-app-password
+```
+
+### Middleware Order
+
+The middleware stack is order-sensitive:
+
+```python
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',      # HTTPS redirect, security headers
+    'whitenoise.middleware.WhiteNoiseMiddleware',          # static files — must be after SecurityMiddleware
+    'corsheaders.middleware.CorsMiddleware',               # CORS headers — must be before CommonMiddleware
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+```
+
+`SecurityMiddleware` is first so HTTPS redirects and security headers are applied before any other processing. `CorsMiddleware` must appear before `CommonMiddleware` so preflight `OPTIONS` requests are handled before Django's URL routing rejects them.
+
+### Django Admin Panel
+
+All four models are registered in `accounts/admin.py` and accessible at `/admin/`:
+
+| Admin URL | Model | Columns shown |
+|---|---|---|
+| `/admin/accounts/user/` | `User` | `id`, `username`, `email`, `role`, `is_active` |
+| `/admin/accounts/caregiver/` | `Caregiver` | `id`, `first_name`, `last_name`, `user` (FK → User), `phone`, `is_active` |
+| `/admin/accounts/client/` | `Client` | `id`, `first_name`, `last_name`, `contact_phone`, `is_active` |
+| `/admin/accounts/visit/` | `Visit` | `id`, `caregiver` (FK → Caregiver), `client` (FK → Client), `scheduled_date`, `scheduled_time`, `status` |
+
+The Visit admin list is the clearest demonstration of the foreign-key joins: the `caregiver` and `client` columns each resolve their FK to display the related record's name in a single list view.
+
+Access requires a user with `is_staff = True` (all Admin-role users qualify).
+
+
