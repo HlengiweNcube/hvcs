@@ -270,15 +270,65 @@ Four tables drive the application:
 | Model | Key fields | Notes |
 |---|---|---|
 | `User` | `id`, `username`, `email`, `role` (ADMIN/MANAGER/CAREGIVER) | Extends `AbstractUser`; role gates every view |
-| `Caregiver` | `id`, `user` (OneToOne), `first_name`, `last_name`, `phone`, `qualifications`, `is_active` | Separate profile so admin/manager users don't need one |
+| `Caregiver` | `id`, `user` (OneToOne), `first_name`, `last_name`, `phone`, `qualifications`, `employment_status`, `date_left`, `is_active` | Separate profile so admin/manager users don't need one; never hard-deleted (see below) |
 | `Client` | `id`, `first_name`, `last_name`, `address`, `contact_phone`, `care_needs`, `is_active` | Soft-deletable via `is_active` flag |
 | `Visit` | `id`, `caregiver` (FK), `client` (FK), `scheduled_date`, `scheduled_time`, `status`, `notes`, `check_in_time`, `check_out_time`, `check_in_lat`, `check_in_lng`, `check_in_address` | GPS data stored on check-in |
+
+### Caregiver Soft-Delete & Employment Status
+
+Caregivers are **never hard-deleted**. Deleting a caregiver record would orphan all their visit history and destroy the compliance audit trail. Instead, when a caregiver resigns or is terminated:
+
+1. `caregiver.is_active` is set to `False` — they no longer appear in active lists or receive new visits
+2. `caregiver.employment_status` is set to `RESIGNED` or `TERMINATED`
+3. `caregiver.date_left` records when they left
+4. `caregiver.user.is_active` is set to `False` — their login is disabled
+
+Their visit records remain fully intact and visible in compliance and audit reports.
+
+`EmploymentStatus` choices: `ACTIVE` | `RESIGNED` | `TERMINATED`
+
+### POPIA Compliance (Protection of Personal Information Act)
+
+South African law (POPIA) grants individuals the **right to request erasure** of their personal data. The `Caregiver.anonymize()` method satisfies this without destroying the operational record:
+
+```python
+def anonymize(self):
+    self.first_name = 'Anonymised'
+    self.last_name  = f'User {self.pk}'   # preserves the PK link to visit records
+    self.phone = ''
+    self.qualifications = ''
+    self.profile_image = None
+    self.user.email = self.user.first_name = self.user.last_name = ''
+    self.user.is_active = False
+```
+
+- **Personal identifiers erased**: name, phone, email, profile photo, qualifications
+- **Preserved**: `caregiver.id`, all linked `Visit` rows (required for legal/audit purposes)
+- The "Anonymise & Deactivate" button on the deactivate confirmation page triggers this method
 
 `Visit.status` uses an inner `TextChoices` enum: `SCHEDULED → IN_PROGRESS → COMPLETED` (or `CANCELLED`).
 
 All relationships use Django's ORM `ForeignKey` / `OneToOneField` with `on_delete=CASCADE`, so deleting a `User` cascades to their `Caregiver` record and all associated `Visit` rows.
 
 Full field definitions: [accounts/models.py](accounts/models.py)
+
+### Design Evolution
+
+The original ERD included two additional tables — `VISIT_NOTE` and `COMPLIANCE_ALERT` — that were consolidated during implementation:
+
+| Planned table | Why it was removed | What replaced it |
+|---|---|---|
+| `VISIT_NOTE` | Each visit requires only a single note; a separate table adds a join with no benefit at this scale | `Visit.notes` text field — stores the note directly on the visit record |
+| `COMPLIANCE_ALERT` | Stored alerts go stale the moment a caregiver checks in; real-time accuracy is more important than persistence | Computed live in `admin_dashboard_view` and `compliance_dashboard` — missed check-ins and never-started visits are derived from `Visit.status` on every page load |
+
+The four-table schema demonstrates all required relationship types:
+
+| Relationship | Tables involved | Django field |
+|---|---|---|
+| One-to-One | `Caregiver` → `User` | `OneToOneField(User, on_delete=CASCADE)` |
+| Many-to-One (FK) | `Visit` → `Caregiver` | `ForeignKey(Caregiver, on_delete=CASCADE)` |
+| Many-to-One (FK) | `Visit` → `Client` | `ForeignKey(Client, on_delete=CASCADE)` |
+| Cascade delete | `User` → `Caregiver` → `Visit` | `on_delete=CASCADE` on both FKs |
 
 ---
 

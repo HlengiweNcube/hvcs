@@ -673,13 +673,27 @@ def caregiver_update(request, pk):
 
 @role_required(User.Role.ADMIN)
 def caregiver_delete(request, pk):
-    """
-    Confirm and delete a caregiver.  Deleting the User cascades to the
-    Caregiver profile and all associated visits via on_delete=CASCADE.
+    """Soft-deactivate a caregiver; never hard-delete (preserves visit audit trail).
+
+    POPIA compliance: the 'anonymise' action additionally erases all personal
+    identifiers while keeping the caregiver ID and visit records intact.
     """
     caregiver = get_object_or_404(Caregiver, pk=pk, user__role=User.Role.CAREGIVER)
     if request.method == 'POST':
-        caregiver.user.delete()
+        action = request.POST.get('action', 'deactivate')
+        caregiver.is_active = False
+        caregiver.employment_status = Caregiver.EmploymentStatus.RESIGNED
+        caregiver.date_left = timezone.now().date()
+        caregiver.save()
+        caregiver.user.is_active = False
+        caregiver.user.save()
+        if action == 'anonymise':
+            caregiver.anonymize()
+        messages.success(
+            request,
+            f'{caregiver} has been deactivated'
+            + (' and personal data anonymised (POPIA).' if action == 'anonymise' else '.'),
+        )
         return redirect('caregiver_list')
     return render(request, 'accounts/caregiver_confirm_delete.html', {'caregiver': caregiver})
 

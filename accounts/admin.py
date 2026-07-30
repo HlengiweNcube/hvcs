@@ -11,7 +11,8 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Caregiver)
 class CaregiverAdmin(admin.ModelAdmin):
-    list_display = ('id', 'first_name', 'last_name', 'user', 'phone', 'is_active')
+    list_display = ('id', 'first_name', 'last_name', 'user', 'phone', 'employment_status', 'date_left', 'is_active')
+    list_filter = ('employment_status', 'is_active')
     list_select_related = ('user',)
 
 

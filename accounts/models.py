@@ -29,6 +29,11 @@ class Caregiver(models.Model):
     system handles credentials while this model stores care-specific data.
     Deleting the User cascades and removes this profile automatically.
     """
+    class EmploymentStatus(models.TextChoices):
+        ACTIVE     = 'ACTIVE',      'Active'
+        RESIGNED   = 'RESIGNED',    'Resigned'
+        TERMINATED = 'TERMINATED',  'Terminated'
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='caregiver_profile')
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
@@ -36,12 +41,41 @@ class Caregiver(models.Model):
     qualifications = models.CharField(max_length=255, blank=True)
     profile_image = models.ImageField(upload_to='caregiver_photos/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
+    employment_status = models.CharField(
+        max_length=20,
+        choices=EmploymentStatus.choices,
+        default=EmploymentStatus.ACTIVE,
+    )
+    date_left = models.DateField(null=True, blank=True, help_text='Date the caregiver left the organisation.')
 
     class Meta:
         ordering = ('last_name', 'first_name')
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
+
+    def anonymize(self):
+        """Erase personal identifiers in place — POPIA right-to-erasure.
+
+        Visit records are preserved for operational and legal audit purposes;
+        only the caregiver's identifying details are overwritten.
+        """
+        from django.utils import timezone
+        self.first_name = 'Anonymised'
+        self.last_name  = f'User {self.pk}'
+        self.phone = ''
+        self.qualifications = ''
+        self.profile_image = None
+        self.is_active = False
+        self.employment_status = self.EmploymentStatus.RESIGNED
+        if not self.date_left:
+            self.date_left = timezone.now().date()
+        self.save()
+        self.user.email      = ''
+        self.user.first_name = ''
+        self.user.last_name  = ''
+        self.user.is_active  = False
+        self.user.save()
 
 
 class Client(models.Model):

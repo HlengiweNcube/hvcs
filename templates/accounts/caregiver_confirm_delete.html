@@ -1,15 +1,25 @@
 ﻿{% extends "base.html" %}
-{% block title %}Delete Caregiver — HVCS{% endblock %}
+{% block title %}Deactivate Caregiver — HVCS{% endblock %}
 {% block main_class %}page page--narrow{% endblock %}
 {% block content %}
-<h1 class="page-title">Delete Caregiver</h1>
-<div class="alert alert--danger">
-    Are you sure you want to permanently delete caregiver <strong>{{ caregiver.first_name }} {{ caregiver.last_name }}</strong> ({{ caregiver.user.username }})? Their account and all related data will be removed.
+<h1 class="page-title">Deactivate Caregiver</h1>
+
+<div class="alert alert--warning">
+    <strong>{{ caregiver.first_name }} {{ caregiver.last_name }}</strong> ({{ caregiver.user.username }}) will be marked as <em>Resigned</em> and their login disabled.
+    Their visit history is preserved for compliance and audit purposes.
 </div>
-<form method="post" class="form-shell">
+
+<div class="alert alert--info" style="margin-top:12px">
+    <strong>POPIA — Right to Erasure:</strong> If this caregiver has requested removal of their personal data,
+    use <em>Anonymise &amp; Deactivate</em>. This replaces their name, phone, and email with anonymous identifiers
+    while keeping visit records intact for legal and operational audit purposes.
+</div>
+
+<form method="post" class="form-shell" style="margin-top:20px">
     {% csrf_token %}
-    <div class="action-row">
-        <button type="submit" class="button button--danger">Yes, Delete</button>
+    <div class="action-row" style="gap:10px;display:flex;flex-wrap:wrap">
+        <button type="submit" name="action" value="deactivate" class="button button--warning">Deactivate (keep data)</button>
+        <button type="submit" name="action" value="anonymise" class="button button--danger">Anonymise &amp; Deactivate (POPIA)</button>
         <a class="button-link" href="{% url 'caregiver_list' %}">Cancel</a>
     </div>
 </form>
