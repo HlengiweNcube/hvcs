@@ -90,6 +90,12 @@ The central operational record. Links a `Caregiver` to a `Client` for a specific
 
 GPS check-in data (`check_in_lat`, `check_in_lng`, `check_in_address`) is stored when the caregiver checks in via the browser's Geolocation API. `check_in_time` and `check_out_time` record the exact timestamps.
 
+### 4.3 Primary Keys and Foreign Keys
+
+![Primary keys and foreign keys across all tables](primary_and_foreign_keys.png)
+
+![Foreign key relationships](table_foreign_keys.png)
+
 ---
 
 ## 5. User Roles and Access Control
@@ -130,14 +136,82 @@ Account creation is intentionally restricted:
 - Soft-delete: Sets `is_active=False` on both the `Caregiver` and `User`. Optionally anonymises personal data (POPIA).
 - Profile images: Uploaded to `caregiver_photos/` via Django's `ImageField`.
 
+**Caregiver list (UI):**
+
+![Caregiver list showing active and anonymised rows](accounts_caregiver_table_UI.png)
+
+**Caregiver table in the database:**
+
+![Caregiver table in DB — is_active, employment_status, anonymised fields](accounts_caregiver_table_db.png)
+
+**Deactivate / anonymise confirmation page:**
+
+![Deactivate confirmation with POPIA anonymise option](accounts_caregiver_table_when_updating_UI.png)
+
+**Database state after deactivation:**
+
+![Caregiver row in DB after deactivation](accounts_caregiver_table_when_updating_DB.png)
+
+**Caregiver list after deactivation (inactive rows still visible):**
+
+![Caregiver list after soft-delete](accounts_caregiver_table_after_deleting_UI.png)
+
+**Caregiver's assigned clients and visits (UI):**
+
+![Caregiver with multiple assigned clients and visits](accounts_caregiver_many_clients_and_visit_ui.png)
+
+**Corresponding database state:**
+
+![DB rows for caregiver visits and clients](accounts_caregiver_many_clients_and_visit_db.png)
+
 ### 6.2 Client Management (Admin)
 - Full CRUD via standard Django forms.
 - Soft-deleted via `is_active` flag; inactive clients are excluded from active lists.
+
+**Client list before adding new clients:**
+
+![Client list — before](accounts_client_table_before_adding_moreclients_UI.png)
+
+![Client table in DB — before](accounts_client_table_before_adding_moreclients.png)
+
+**After adding more clients:**
+
+![Client list — after adding clients](accounts_client_table_after_adding_moreclients_UI.png)
+
+![Client table in DB — after adding](accounts_client_table_after_adding_moreclients.png)
+
+**After editing a client's care needs:**
+
+![Client list — after editing care needs](accounts_client_table_after_editing_careneedsUI.png)
+
+![Client table in DB — updated care needs](accounts_client_table_after_editing_careneedsDB.png)
+
+**After soft-deleting a client:**
+
+![Client list — after soft-delete](accounts_client_table_deleting_clients_UI.png)
+
+![Client table in DB — is_active=0](accounts_client_table_deleting_clients_DB.png)
 
 ### 6.3 Visit Scheduling (Admin)
 - `VisitForm` restricts the caregiver dropdown to `Caregiver.objects.filter(is_active=True)` — deactivated caregivers cannot be assigned new visits.
 - Date and time inputs use HTML5 `type="date"` and `type="time"` widgets.
 - The visit list page provides date-range and status filters via GET parameters (`date_from`, `date_to`, `status`).
+
+**Visit list (UI) with filter bar and status badges:**
+
+![Visit list with filter bar](accounts_visit_table_ui.png)
+
+**Visit table in the database:**
+
+![Visit table in DB](accounts_visit_table_db.png)
+
+**After scheduling a new visit (UI):**
+
+![Visit list after scheduling a new visit](accounts_visit_table_after_shcedule_ui.png)
+
+**After scheduling a new visit (DB):**
+
+![Visit table in DB after new visit](accounts_visit_table_after_schedule_db.png)
 
 ### 6.4 GPS Check-In / Check-Out (Caregiver)
 When a caregiver checks in:
@@ -149,6 +223,10 @@ When a caregiver checks in:
 Check-out sets `check_out_time` and transitions status to `COMPLETED`.
 
 GPS is optional — caregivers can check in without location permission and the visit will still be recorded.
+
+**Admin dashboard:**
+
+![Admin dashboard](Admin_dashboard.png)
 
 ### 6.5 Compliance Dashboard (Admin and Manager)
 The compliance dashboard surfaces:
