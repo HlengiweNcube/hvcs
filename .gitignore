@@ -36,3 +36,19 @@ htmlcov/
 
 # Node / frontend
 frontend/node_modules/
+
+# Qt and SQLite binaries (not part of the project)
+*.dll
+*.exe
+bearer/
+extensions/
+iconengines/
+imageformats/
+licenses/
+platforms/
+printsupport/
+styles/
+translations/
+
+# PowerPoint temp files
+~$*.pptx
