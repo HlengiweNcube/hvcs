@@ -134,8 +134,17 @@ body {
     flex: 1;
 }
 
+/* flex row on desktop; flex:1 pushes logout to the right */
+.navbar-menu {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+/* always visible in the navbar bar, never in the hamburger dropdown */
 .navbar-logout {
     margin-left: auto;
+    flex-shrink: 0;
 }
 
 .navbar-logout form { margin: 0; }
@@ -1422,17 +1431,6 @@ body {
         width: 100%;
         text-align: left;
         font-size: 0.9rem;
-    }
-
-    .navbar-logout {
-        margin-left: 0;
-        padding-top: 8px;
-        border-top: 1px solid rgba(255,255,255,.15);
-    }
-
-    .navbar-logout .nav-btn {
-        width: 100%;
-        text-align: left;
     }
 
     .page {

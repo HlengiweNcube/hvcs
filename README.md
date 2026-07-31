@@ -739,4 +739,122 @@ The Visit admin list is the clearest demonstration of the foreign-key joins: the
 
 Access requires a user with `is_staff = True` (all Admin-role users qualify).
 
+---
+
+## Contingency / Fallback Plan
+
+This section describes what users should do if the HVCS application is unavailable or a specific feature fails.
+
+### Scenario 1 — Web application is completely unreachable
+
+**Likely causes:** server outage, network failure, Render platform downtime.
+
+| Role | Immediate action |
+|---|---|
+| **Caregiver** | Record visit manually on paper (client name, arrival time, departure time, any notes). Photograph or scan the paper record and send to the manager via WhatsApp or email. |
+| **Manager / Admin** | Before any outage occurs, download each caregiver's upcoming schedule as a CSV from the **Caregivers** page (📥 Schedule button) and print it. The caregiver can work from the printed copy without needing app access. |
+| **Admin** | Check Render status page (`https://status.render.com`) to determine if the outage is platform-wide. Restart the web service from the Render dashboard if the process has crashed. |
+
+#### Printing a caregiver's schedule (proactive step)
+
+Admins and managers can download a printable CSV schedule for any caregiver at any time:
+
+1. Go to **Caregivers** (`/accounts/caregivers/`).
+2. Click the **📥 Schedule** button next to the caregiver's name.
+3. The file `schedule_<name>_<date>.csv` downloads automatically — open it in Excel or Google Sheets and print.
+
+The exported file contains: Date, Time, Client name, Client address, Client phone number, Visit status, and Notes — everything a caregiver needs to complete their shift without the app.
+
+### Scenario 2 — GPS check-in fails or location is not captured
+
+**Likely causes:** device location permissions denied, no GPS signal indoors, browser does not support Geolocation API.
+
+- The system is designed to accept a check-in **without GPS** — status still advances to `IN_PROGRESS` and `check_in_time` is recorded.
+- The caregiver should proceed with the check-in as normal; the admin can note the missing GPS data in the visit record.
+- As a manual fallback, the caregiver sends a timestamped message (WhatsApp, SMS, or email) to their manager confirming arrival at the client's address.
+
+### Scenario 3 — A caregiver cannot log in (forgotten password / locked account)
+
+- The caregiver contacts the administrator.
+- The admin resets the password via the Django admin panel at `/admin/accounts/user/` → select the user → **Set password**.
+- If the admin panel is unavailable, the system administrator runs:
+  ```bash
+  python manage.py changepassword <username>
+  ```
+
+### Scenario 4 — Data loss or database corruption
+
+- The SQLite database file (`db.sqlite3`) should be backed up regularly by copying it to a secure location.
+- On Render (PostgreSQL), automatic daily backups are provided by the Render PostgreSQL add-on.
+- To restore from a local SQLite backup, replace `db.sqlite3` with the backup file and restart the server.
+- Visits that occurred during the outage and were recorded manually (see Scenario 1) must be re-entered by the admin once access is restored.
+
+### Scenario 5 — Browser or device incompatibility
+
+- The application is tested on modern Chromium-based browsers (Chrome, Edge) and Firefox.
+- If the application does not render correctly, try a different browser or clear the browser cache (`Ctrl + Shift + R`).
+- The Django template frontend (`http://127.0.0.1:8000/`) is the primary fallback if the React SPA (`/react/`) fails to load.
+
+### Scenario 6 — React SPA cannot reach the API
+
+**Symptom:** login succeeds but dashboard shows no data or a network error.
+
+- Check that the Django server is running (`python manage.py runserver`).
+- Check the browser console for CORS or 401 errors.
+- If the JWT token has expired, logging out and back in will issue a fresh token.
+- As a fallback, all the same data is accessible through the Django template frontend at `http://127.0.0.1:8000/accounts/admin-dashboard/`.
+
+### General recovery contacts
+
+| Contact | Responsibility |
+|---|---|
+| System Administrator | Server restarts, password resets, database recovery |
+| Manager | Collecting manual records from caregivers during outages |
+| Render Support | Platform-level infrastructure issues (`https://render.com/support`) |
+
+
+
+### Frameworks & Libraries
+
+Django Software Foundation. (2025). *Django documentation* (Version 6.0). Retrieved from https://docs.djangoproject.com/en/6.0/
+
+Christie, T. (2024). *Django REST Framework documentation*. Retrieved from https://www.django-rest-framework.org/
+
+Jazzband. (2024). *djangorestframework-simplejwt: Simple JWT authentication for Django REST Framework*. Retrieved from https://django-rest-framework-simplejwt.readthedocs.io/en/latest/
+
+Meta Platforms, Inc. (2024). *React: The library for web and native user interfaces*. Retrieved from https://react.dev/
+
+Vite Contributors. (2024). *Vite documentation*. Retrieved from https://vitejs.dev/guide/
+
+Evans, D. (2024). *WhiteNoise: Radically simplified static file serving for Python web apps*. Retrieved from https://whitenoise.readthedocs.io/en/stable/
+
+Holovaty, A., & Kaplan-Moss, J. (2009). *The Definitive Guide to Django: Web development done right* (2nd ed.). Apress. https://doi.org/10.1007/978-1-4302-1936-1
+
+### Standards & Security
+
+Jones, M., Bradley, J., & Sakimura, N. (2015). *JSON Web Token (JWT)* (RFC 7519). Internet Engineering Task Force (IETF). https://doi.org/10.17487/RFC7519
+
+OWASP Foundation. (2021). *OWASP Top Ten: The ten most critical web application security risks*. Retrieved from https://owasp.org/www-project-top-ten/
+
+OWASP Foundation. (2021). *OWASP Authentication cheat sheet*. Retrieved from https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
+
+OWASP Foundation. (2021). *OWASP SQL injection prevention cheat sheet*. Retrieved from https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html
+
+### Legislation
+
+Republic of South Africa. (2013). *Protection of Personal Information Act 4 of 2013* (POPIA). Government Gazette No. 37067. Retrieved from https://popia.co.za/protection-of-personal-information-act-4-of-2013/
+
+### Services & Infrastructure
+
+OpenStreetMap Foundation. (2024). *Nominatim: Search engine for OpenStreetMap data*. Retrieved from https://nominatim.openstreetmap.org/
+
+Render. (2024). *Render documentation: Deploy web services*. Retrieved from https://render.com/docs
+
+SQLite Development Team. (2024). *SQLite documentation*. Retrieved from https://www.sqlite.org/docs.html
+
+### AI Tools Used
+
+GitHub. (2024). *GitHub Copilot: AI-powered coding assistant*. GitHub, Inc. Retrieved from https://github.com/features/copilot
+
+GitHub Copilot (powered by Claude Sonnet, Anthropic) was used during development to assist with code completion, debugging layout issues, and drafting documentation sections. All generated code was reviewed, tested, and adapted by the developer before inclusion in the project.
 

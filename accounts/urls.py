@@ -35,5 +35,6 @@ urlpatterns = [
     path('managers/<int:pk>/edit/', views.manager_update, name='manager_update'),
     path('managers/<int:pk>/delete/', views.manager_delete, name='manager_delete'),
     path('send-schedule/', views.send_schedule_email, name='send_schedule_email'),
+    path('caregivers/<int:pk>/schedule.csv', views.export_caregiver_schedule, name='export_caregiver_schedule'),
     path('audit-report/', views.export_audit_report, name='export_audit_report'),
 ]

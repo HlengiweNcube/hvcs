@@ -41,6 +41,7 @@
                     </td>
                     <td>
                         <a class="action-link" href="{% url 'caregiver_update' caregiver.id %}" aria-label="Edit {{ caregiver.first_name }} {{ caregiver.last_name }}">Edit</a>
+                        <a class="action-link" href="{% url 'export_caregiver_schedule' caregiver.id %}" aria-label="Download schedule for {{ caregiver.first_name }} {{ caregiver.last_name }}" title="Download upcoming schedule as CSV">📥 Schedule</a>
                         <a class="action-link action-link--danger" href="{% url 'caregiver_delete' caregiver.id %}" aria-label="Delete {{ caregiver.first_name }} {{ caregiver.last_name }}">Delete</a>
                     </td>
                 </tr>

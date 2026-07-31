@@ -880,6 +880,40 @@ def send_schedule_email(request):
 
 
 @role_required(User.Role.ADMIN, User.Role.MANAGER)
+def export_caregiver_schedule(request, pk):
+    """Download a CSV of a single caregiver's upcoming visits for offline/printed use."""
+    from django.http import HttpResponse as _HR
+    caregiver = get_object_or_404(Caregiver, pk=pk)
+    today = timezone.now().date()
+
+    visits = (
+        Visit.objects.filter(caregiver=caregiver, scheduled_date__gte=today)
+        .select_related('client')
+        .order_by('scheduled_date', 'scheduled_time')
+    )
+
+    safe_name = f"{caregiver.first_name}_{caregiver.last_name}".replace(' ', '_')
+    filename = f'schedule_{safe_name}_{today}.csv'
+    response = _HR(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Date', 'Time', 'Client', 'Client Address', 'Client Phone', 'Status', 'Notes'])
+    for v in visits:
+        writer.writerow([
+            v.scheduled_date.strftime('%d %b %Y'),
+            v.scheduled_time.strftime('%H:%M'),
+            str(v.client),
+            v.client.address,
+            v.client.contact_phone,
+            v.get_status_display(),
+            v.notes,
+        ])
+
+    return response
+
+
+@role_required(User.Role.ADMIN, User.Role.MANAGER)
 def export_audit_report(request):
     """Download a CSV audit report of all visits for a given date range."""
     today = timezone.now().date()

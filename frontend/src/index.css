@@ -41,6 +41,8 @@ a:hover { text-decoration: underline; }
 .navbar-links { display: flex; gap: 1rem; align-items: center; }
 .navbar-links a { color: #c7f5d9; font-size: .9rem; }
 .navbar-links a:hover { color: #fff; }
+.navbar-actions { display: flex; gap: .5rem; align-items: center; margin-left: auto; }
+.navbar-user { color: #c7f5d9; font-size: .85rem; }
 
 .main { flex: 1; padding: 2rem 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; }
 
@@ -214,6 +216,8 @@ tr:hover td { background: #f0faf4; }
   }
   .navbar-menu.open { display: flex; }
 
+  .navbar-user { display: none; }
+
   .navbar-links {
     flex-direction: column;
     gap: .25rem;
@@ -221,8 +225,7 @@ tr:hover td { background: #f0faf4; }
     align-items: flex-start;
   }
 
-  .navbar-links a,
-  .navbar-links button {
+  .navbar-links a {
     width: 100%;
     text-align: left;
     padding: .6rem .5rem;
