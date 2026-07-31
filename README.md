@@ -4,6 +4,21 @@ A web application for managing home care visits, caregivers, clients, and compli
 
 ---
 
+## Live Demo
+
+**Hosted on Render:** https://hvcs.onrender.com
+
+### Demo Credentials
+
+| Role | Username | Password |
+|---|---|---|
+| Admin | `admin` | `Lastchance12345` |
+
+Log in at `/` (Django template frontend) or `/react/login` (React SPA).
+The admin account can create Managers and Caregivers via the web interface.
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
