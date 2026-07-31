@@ -84,6 +84,7 @@ class CaregiverUpdateForm(forms.ModelForm):
     Surfaces User fields (username, email) alongside Caregiver profile
     fields so both records can be updated in one form submission.
     """
+    username = forms.CharField(max_length=150)
     email = forms.EmailField(required=False)
 
     class Meta:
