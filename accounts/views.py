@@ -701,6 +701,8 @@ def caregiver_delete(request, pk):
 
 class VisitForm(forms.ModelForm):
     """Admin form for scheduling and editing visits."""
+    caregiver = forms.ModelChoiceField(queryset=Caregiver.objects.filter(is_active=True))
+
     class Meta:
         model = Visit
         fields = ('caregiver', 'client', 'scheduled_date', 'scheduled_time', 'status', 'notes')
