@@ -37,12 +37,12 @@
         </div>
     </div>
     <div class="navbar-logout">
-        <form method="post" id="logout-form" action="{% url 'logout' %}">
+        <form method="post" id="logout-form" action="{% url 'accounts_logout' %}">
             {% csrf_token %}
             <button type="submit" class="nav-btn">Logout</button>
         </form>
     </div>
-    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+    <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
         <span></span><span></span><span></span>
     </button>
 </nav>

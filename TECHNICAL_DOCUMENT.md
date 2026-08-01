@@ -2,7 +2,7 @@
 
 ## 1. System Overview
 
-HVCS (Home Visit Care System) is a full-stack web application for managing home care visits, caregivers, and clients. It was built to address real operational needs in a home care organisation: scheduling visits, tracking caregiver check-in/out with GPS, monitoring compliance, and protecting personal data in line with South African POPIA legislation.
+HVCS (Home Visit Care System) is a full-stack web application for managing home care visits, caregivers, and clients. It was built to address real operational needs in a home care organisation: scheduling visits, tracking caregiver check-in/out with GPS, monitoring compliance, and protecting personal data in line with GDPR (General Data Protection Regulation) as enforced in Ireland.
 
 The system has two frontend surfaces backed by a single Django server:
 
@@ -71,7 +71,7 @@ Caregivers are **never hard-deleted**. Deleting a caregiver would orphan all the
 - `date_left` records when they left
 - `user.is_active = False` — disables their login
 
-The `anonymize()` method satisfies POPIA right-to-erasure requests by overwriting all personal identifiers (name, phone, email, photo) while leaving the caregiver's `id` and visit records intact.
+The `anonymize()` method satisfies the GDPR right-to-erasure (Article 17) by overwriting all personal identifiers (name, phone, email, photo) while leaving the caregiver's `id` and visit records intact.
 
 #### Client
 Stores client details: `first_name`, `last_name`, `address`, `contact_phone`, `care_needs`. Also soft-deleted via `is_active`. An `assigned_caregiver` FK optionally links a client to their primary caregiver.
@@ -133,7 +133,7 @@ Account creation is intentionally restricted:
 ### 6.1 Caregiver Management (Admin)
 - Create: Admin fills a form that creates both a `User` (with `role=CAREGIVER`) and a linked `Caregiver` profile in one transaction.
 - Edit: `CaregiverUpdateForm` surfaces user fields (`username`, `email`) and profile fields (`phone`, `qualifications`, `is_active`) in a single form. The `save()` method writes to both the `User` and `Caregiver` tables.
-- Soft-delete: Sets `is_active=False` on both the `Caregiver` and `User`. Optionally anonymises personal data (POPIA).
+- Soft-delete: Sets `is_active=False` on both the `Caregiver` and `User`. Optionally anonymises personal data (GDPR).
 - Profile images: Uploaded to `caregiver_photos/` via Django's `ImageField`.
 
 **Caregiver list (UI):**
@@ -146,7 +146,7 @@ Account creation is intentionally restricted:
 
 **Deactivate / anonymise confirmation page:**
 
-![Deactivate confirmation with POPIA anonymise option](accounts_caregiver_table_when_updating_UI.png)
+![Deactivate confirmation with GDPR anonymise option](accounts_caregiver_table_when_updating_UI.png)
 
 **Database state after deactivation:**
 
@@ -310,7 +310,7 @@ Django migrations track every schema change as a versioned file:
 ### CSRF
 All HTML forms include `{% csrf_token %}`. Django's `CsrfViewMiddleware` rejects any state-changing request without a valid token. The React SPA uses JWT (stateless) and does not use cookies, so CSRF is not applicable.
 
-### POPIA (Protection of Personal Information Act)
+### GDPR (General Data Protection Regulation)
 The `Caregiver.anonymize()` method satisfies the right-to-erasure requirement by overwriting all personal identifiers while keeping operational records intact. Caregivers are never hard-deleted.
 
 ### Production
