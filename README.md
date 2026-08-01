@@ -306,9 +306,9 @@ Their visit records remain fully intact and visible in compliance and audit repo
 
 `EmploymentStatus` choices: `ACTIVE` | `RESIGNED` | `TERMINATED`
 
-### POPIA Compliance (Protection of Personal Information Act)
+### GDPR Compliance (General Data Protection Regulation)
 
-South African law (POPIA) grants individuals the **right to request erasure** of their personal data. The `Caregiver.anonymize()` method satisfies this without destroying the operational record:
+GDPR (Article 17) grants individuals the **right to request erasure** of their personal data. The `Caregiver.anonymize()` method satisfies this without destroying the operational record:
 
 ```python
 def anonymize(self):
@@ -857,7 +857,7 @@ OWASP Foundation. (2021). *OWASP SQL injection prevention cheat sheet*. Retrieve
 
 ### Legislation
 
-Republic of South Africa. (2013). *Protection of Personal Information Act 4 of 2013* (POPIA). Government Gazette No. 37067. Retrieved from https://popia.co.za/protection-of-personal-information-act-4-of-2013/
+European Parliament and Council of the European Union. (2016). *General Data Protection Regulation (EU) 2016/679* (GDPR). Official Journal of the European Union. Retrieved from https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32016R0679
 
 ### Services & Infrastructure
 
